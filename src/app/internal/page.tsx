@@ -86,20 +86,7 @@ export default function InternalPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="w-full flex justify-between items-center p-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold text-red-600">Virgin Initiatives - Internal Portal</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Welcome, {user.email}</span>
-          <button 
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-      
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-6 pt-24">
         <div className="max-w-4xl mx-auto bg-gray-50 rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-red-600 mb-6">Add New Challenge</h2>
           

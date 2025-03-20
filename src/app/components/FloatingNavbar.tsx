@@ -40,7 +40,7 @@ const FloatingNavbar = () => {
     <>
       {/* Floating navbar */}
       <div className="fixed top-4 left-0 right-0 z-50 mx-auto px-4">
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.2)] py-1 px-3 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.2)] py-1 px-3 flex items-center justify-between relative before:absolute before:content-[''] before:inset-[4px] before:rounded-[22px] before:border before:border-red-600 before:pointer-events-none">
           {/* Left section - empty now */}
           <div className="w-1/3"></div>
           
