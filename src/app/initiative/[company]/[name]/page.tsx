@@ -8,7 +8,7 @@ type Initiative = {
   company: string;
   initiative: string;
   challenge: string;
-  solution: string;
+  whatVirginIsDoing: string;
   callToAction: string;
   links: string[];
 };
@@ -36,39 +36,27 @@ export default function InitiativeDetails({
     }
 
     setLoading(true);
-    // Fetch and parse the CSV data
-    fetch('/res/sample_initiatives.csv')
-      .then(response => response.text())
-      .then(csvText => {
-        const lines = csvText.split('\n');
-        const parsedInitiatives: Initiative[] = [];
-        
-        // Skip the header row (index 0)
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (line) {
-            // Split by comma but handle commas within quotes
-            const matches = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-            if (matches && matches.length >= 6) {
-              const initiative: Initiative = {
-                company: matches[0].replace(/"/g, ''),
-                initiative: matches[1].replace(/"/g, ''),
-                challenge: matches[2].replace(/"/g, ''),
-                solution: matches[3].replace(/"/g, ''),
-                callToAction: matches[4].replace(/"/g, ''),
-                links: matches[5].replace(/"/g, '').split('\n').map(link => link.trim()).filter(Boolean),
-              };
-              parsedInitiatives.push(initiative);
-            }
-          }
-        }
+    // Fetch and parse the JSON data
+    fetch('/res/sample_initiatives.json')
+      .then(response => response.json())
+      .then(data => {
+        // Map JSON keys to our Initiative type
+        const parsedInitiatives: Initiative[] = data.map((item: any) => ({
+          company: item['Virgin Company'],
+          initiative: item['Initiaitive'],
+          challenge: item['Challenge'],
+          whatVirginIsDoing: item['What Virgin is doing'],
+          callToAction: item['Call to Action'],
+          links: item['Links']
+            ? item['Links'].split('\n').map((link: string) => link.trim()).filter(Boolean)
+            : []
+        }));
         
         // Filter initiatives by company and name
-        const filteredInitiatives = parsedInitiatives.filter(
-          initiative => 
-            initiative.company === decodedCompany && 
-            initiative.initiative === decodedName
-        );
+        const filteredInitiatives = parsedInitiatives.filter(initiative => {
+          const companies = initiative.company.split('&').map(c => c.trim());
+          return companies.includes(decodedCompany) && initiative.initiative === decodedName;
+        });
         
         setInitiatives(filteredInitiatives);
         setLoading(false);
@@ -90,35 +78,11 @@ export default function InitiativeDetails({
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="w-full flex justify-between items-center p-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold text-red-600">Virgin Initiatives</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Welcome, {user.email}</span>
-          <button 
-            onClick={() => router.push("/")}
-            className="px-4 py-2 text-red-600 hover:text-red-700 transition-colors text-sm"
-          >
-            All Initiatives
-          </button>
-          <button 
-            onClick={() => router.push("/my-initiatives")}
-            className="px-4 py-2 text-red-600 hover:text-red-700 transition-colors text-sm"
-          >
-            My Initiatives
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-      
       <main className="container mx-auto p-6">
         <button 
           onClick={() => router.back()}
           className="mb-6 flex items-center text-red-600 hover:text-red-700"
+          style={{ cursor: 'pointer' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -151,13 +115,13 @@ export default function InitiativeDetails({
                 
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-gray-700 mb-2">What Virgin is doing:</h3>
-                  <p className="text-gray-600">{initiative.solution}</p>
+                  <p className="text-gray-600">{initiative.whatVirginIsDoing}</p>
                 </div>
                 
                 {initiative.callToAction && (
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">Call to Action:</h3>
-                    <p className="text-gray-600">{initiative.callToAction}</p>
+                    <p className="text-gray-600 whitespace-pre-line">{initiative.callToAction}</p>
                   </div>
                 )}
                 
@@ -173,6 +137,7 @@ export default function InitiativeDetails({
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-red-600 hover:underline"
+                            style={{ cursor: 'pointer' }}
                           >
                             {link}
                           </a>

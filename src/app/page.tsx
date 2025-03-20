@@ -14,7 +14,7 @@ type Initiative = {
 };
 
 type InitiativeWithCount = {
-  name: string;
+  initiative: string;
   count: number;
 };
 
@@ -43,64 +43,50 @@ export default function Home() {
     } else if (user.userType === 'internal') {
       router.push("/internal");
     } else {
-      // Fetch and parse the CSV data
-      fetch('/res/sample_initiatives.csv')
-        .then(response => response.text())
-        .then(csvText => {
-          const lines = csvText.split('\n');
-          const parsedInitiatives: Initiative[] = [];
-          
-          // Skip the header row (index 0)
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line) {
-              // Split by comma but handle commas within quotes
-              const matches = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-              if (matches && matches.length >= 6) {
-                const initiative: Initiative = {
-                  company: matches[0].replace(/"/g, ''),
-                  initiative: matches[1].replace(/"/g, ''),
-                  challenge: matches[2].replace(/"/g, ''),
-                  solution: matches[3].replace(/"/g, ''),
-                  callToAction: matches[4].replace(/"/g, ''),
-                  links: matches[5].replace(/"/g, '').split('\n').map(link => link.trim()).filter(Boolean),
-                };
-                parsedInitiatives.push(initiative);
-              }
-            }
-          }
+      // Fetch and parse the JSON data
+      fetch('/res/sample_initiatives.json')
+        .then(response => response.json())
+        .then(data => {
+          // Map JSON keys to our Initiative type
+          const parsedInitiatives: Initiative[] = data.map((item: any) => ({
+            company: item['Virgin Company'],
+            initiative: item['Initiaitive'],
+            challenge: item['Challenge'],
+            whatVirginIsDoing: item['What Virgin is doing'],
+            callToAction: item['Call to Action'],
+            links: item['Links']
+              ? item['Links'].split('\n').map((link: string) => link.trim()).filter(Boolean)
+              : []
+          }));
+
           setInitiatives(parsedInitiatives);
-          
-          // Create a map to deduplicate and count initiatives
+
+          // Create a map to deduplicate and count initiatives for each company
           const initiativeMap = new Map<string, Map<string, number>>();
-          
-          // Count initiatives by company and name
+
           parsedInitiatives.forEach(initiative => {
-            if (!initiativeMap.has(initiative.company)) {
-              initiativeMap.set(initiative.company, new Map());
-            }
-            
-            const companyMap = initiativeMap.get(initiative.company)!;
-            const currentCount = companyMap.get(initiative.initiative) || 0;
-            companyMap.set(initiative.initiative, currentCount + 1);
+            const companies = initiative.company.split('&').map(c => c.trim());
+            companies.forEach(companyName => {
+              if (!initiativeMap.has(companyName)) {
+                initiativeMap.set(companyName, new Map());
+              }
+              const compInitiatives = initiativeMap.get(companyName)!;
+              compInitiatives.set(
+                initiative.initiative,
+                (compInitiatives.get(initiative.initiative) || 0) + 1
+              );
+            });
           });
-          
-          // Convert map to the expected format
+
           const groupedInitiatives: CompanyInitiatives[] = [];
-          
           initiativeMap.forEach((initiatives, company) => {
             const initiativeList: InitiativeWithCount[] = [];
-            
-            initiatives.forEach((count, name) => {
-              initiativeList.push({ name, count });
+            initiatives.forEach((count, initiativeName) => {
+              initiativeList.push({ initiative: initiativeName, count });
             });
-            
-            groupedInitiatives.push({
-              company,
-              initiatives: initiativeList
-            });
+            groupedInitiatives.push({ company, initiatives: initiativeList });
           });
-          
+
           console.log('Grouped initiatives:', JSON.stringify(groupedInitiatives, null, 2));
           setCompanyInitiatives(groupedInitiatives);
         })
@@ -120,27 +106,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="w-full flex justify-between items-center p-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold text-red-600">Virgin Initiatives</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Welcome, {user.email}</span>
-          <button 
-            onClick={() => router.push("/my-initiatives")}
-            className="px-4 py-2 text-red-600 hover:text-red-700 transition-colors text-sm"
-          >
-            My Initiatives
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-      
       <main className="container mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Our Initiatives</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Our Initiatives</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {companyInitiatives.map((company, index) => (
@@ -158,20 +125,20 @@ export default function Home() {
                 <div className="flex-grow overflow-y-auto px-2">
                   <ul className="space-y-3">
                     {company.initiatives.map((initiative, i) => (
-                      <li 
-                        key={i} 
+                      <li
+                        key={i}
                         className="text-xl font-semibold text-white hover:text-red-300 transition-colors cursor-pointer"
-                        onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.name)}`)}
+                        onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
-                            router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.name)}`);
+                            router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`);
                           }
                         }}
                         tabIndex={0}
                         role="button"
-                        aria-label={`View details for ${initiative.name}`}
+                        aria-label={`View initiative ${initiative.initiative}`}
                       >
-                        {initiative.name} {initiative.count > 1 && `(${initiative.count})`}
+                        {initiative.initiative} {initiative.count > 1 && `(${initiative.count})`}
                       </li>
                     ))}
                   </ul>
