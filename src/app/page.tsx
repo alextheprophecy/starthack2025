@@ -104,48 +104,66 @@ export default function Home() {
     router.push("/login");
   };
 
+  // Reorder companies so that the first row (first two cards) are small if possible
+  const orderedCompanies = [...companyInitiatives];
+  for (let pos = 0; pos < 2 && pos < orderedCompanies.length; pos++) {
+    if (orderedCompanies[pos].initiatives.length > 5) {
+      const swapIndex = orderedCompanies.findIndex((company, idx) => idx >= 2 && company.initiatives.length <= 5);
+      if (swapIndex !== -1) {
+        const temp = orderedCompanies[pos];
+        orderedCompanies[pos] = orderedCompanies[swapIndex];
+        orderedCompanies[swapIndex] = temp;
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto p-6 mt-10">
         <h2 className="text-4xl font-bold mb-6 text-gray-800 text-center">Our Initiatives</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {companyInitiatives.map((company, index) => (
-            <div 
-              key={index} 
-              className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-96"
-              style={{ 
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${backgroundImages[index % backgroundImages.length]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            >
-              <div className="h-full flex flex-col p-6">
-                <h3 className="text-5xl font-extrabold text-white mb-8 tracking-tight">{company.company}</h3>
-                <div className="flex-grow overflow-y-auto px-2">
-                  <ul className="space-y-3">
-                    {company.initiatives.map((initiative, i) => (
-                      <li
-                        key={i}
-                        className="text-xl font-semibold text-white hover:text-red-300 transition-colors cursor-pointer"
-                        onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`);
-                          }
-                        }}
-                        tabIndex={0}
-                        role="button"
-                        aria-label={`View initiative ${initiative.initiative}`}
-                      >
-                        {initiative.initiative} {initiative.count > 1 && `(${initiative.count})`}
-                      </li>
-                    ))}
-                  </ul>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
+          {orderedCompanies.map((company, index) => {
+            // Force first two cards to be small, others follow criteria
+            const isLarge = index < 2 ? false : company.initiatives.length > 5;
+            return (
+              <div 
+                key={index} 
+                className={`rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-96 ${isLarge ? 'md:col-span-2' : ''}`}
+                style={{ 
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${backgroundImages[index % backgroundImages.length]})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                <div className="h-full flex flex-col p-6">
+                  <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">{company.company}</h3>
+                  <div className="flex-grow overflow-y-auto px-2">
+                    <ul className={`space-y-3 ${isLarge ? 'grid grid-cols-2 gap-x-4 gap-y-3 space-y-0' : ''}`}>
+                      {company.initiatives.map((initiative, i) => (
+                        <li
+                          key={i}
+                          className="text-xl text-white hover:text-red-300 transition-colors cursor-pointer flex items-start"
+                          onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`View initiative ${initiative.initiative}`}
+                        >
+                          <span className="mr-2">•</span>
+                          <span>{initiative.initiative} {initiative.count > 1 && `(${initiative.count})`}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
     </div>
