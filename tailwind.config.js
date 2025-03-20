@@ -10,6 +10,13 @@ module.exports = {
         'helvetica-medium': ['HelveticaNeueMedium', 'Helvetica', 'Arial', 'sans-serif'],
         'helvetica-bold': ['HelveticaNeueBold', 'Helvetica', 'Arial', 'sans-serif'],
       },
+      colors: {
+        red: {
+          600: '#e10a0a', // Virgin-style red
+          700: '#c50909', // Darker red for hover states
+          100: '#fee2e2', // Light red for backgrounds
+        }
+      }
     },
   },
   plugins: [],
