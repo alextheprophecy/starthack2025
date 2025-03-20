@@ -11,6 +11,7 @@ type Initiative = {
   whatVirginIsDoing: string;
   callToAction: string;
   links: string[];
+  reward: string;
 };
 
 export default function InitiativeDetails({
@@ -49,7 +50,8 @@ export default function InitiativeDetails({
           callToAction: item['Call to Action'],
           links: item['Links']
             ? item['Links'].split('\n').map((link: string) => link.trim()).filter(Boolean)
-            : []
+            : [],
+          reward: item['Reward'] || 'sustainability'
         }));
         
         // Filter initiatives by company and name
@@ -126,8 +128,15 @@ export default function InitiativeDetails({
                     </div>
                   )}
                   
+                  <div className="mb-6">
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Reward Category:</h3>
+                    <span className="inline-block px-4 py-2 bg-red-100 text-red-700 rounded-full font-medium">
+                      {initiative.reward}
+                    </span>
+                  </div>
+                  
                   {initiative.links && initiative.links.length > 0 && (
-                    <div>
+                    <div className="mb-6">
                       <h3 className="text-xl font-semibold text-gray-700 mb-2">Learn More:</h3>
                       <div className="flex flex-col gap-2">
                         {initiative.links.map((link, i) => (

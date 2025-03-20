@@ -13,7 +13,8 @@ export default function InternalPage() {
     challenge: "",
     virginDoing: "",
     callToAction: "",
-    links: ""
+    links: "",
+    reward: "sustainability"
   });
   const [submitStatus, setSubmitStatus] = useState({ success: false, error: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,7 +37,7 @@ export default function InternalPage() {
     router.push("/login");
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -58,7 +59,8 @@ export default function InternalPage() {
           challenge: formData.challenge,
           whatVirginIsDoing: formData.virginDoing,
           callToAction: formData.callToAction,
-          links: formData.links
+          links: formData.links,
+          reward: formData.reward
         })
       });
 
@@ -74,7 +76,8 @@ export default function InternalPage() {
         challenge: "",
         virginDoing: "",
         callToAction: "",
-        links: ""
+        links: "",
+        reward: "sustainability"
       });
       setSubmitStatus({ success: true, error: "" });
     } catch (error) {
@@ -197,6 +200,25 @@ export default function InternalPage() {
                     className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="https://example.com&#10;https://another-example.com"
                   ></textarea>
+                </div>
+                
+                <div>
+                  <label htmlFor="reward" className="block text-sm font-medium text-gray-700 mb-1">
+                    Reward Category
+                  </label>
+                  <select
+                    id="reward"
+                    name="reward"
+                    value={formData.reward}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <option value="sustainability">Sustainability</option>
+                    <option value="social">Social</option>
+                    <option value="technological">Technological</option>
+                  </select>
                 </div>
               </div>
             </div>

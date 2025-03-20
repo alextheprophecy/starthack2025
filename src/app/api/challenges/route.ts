@@ -10,6 +10,7 @@ interface Challenge {
   "What Virgin is doing": string;
   "Call to Action": string;
   "Links": string;
+  "Reward": string;
 }
 
 export async function POST(request: NextRequest) {
@@ -20,10 +21,10 @@ export async function POST(request: NextRequest) {
 
     // Parse the request body
     const body = await request.json();
-    const { virginCompany, initiative, challenge, whatVirginIsDoing, callToAction, links } = body;
+    const { virginCompany, initiative, challenge, whatVirginIsDoing, callToAction, links, reward } = body;
 
     // Validate required fields
-    if (!virginCompany || !initiative || !challenge || !whatVirginIsDoing || !callToAction || !links) {
+    if (!virginCompany || !initiative || !challenge || !whatVirginIsDoing || !callToAction || !links || !reward) {
       return NextResponse.json({ message: 'All fields are required' }, { status: 400 });
     }
 
@@ -46,7 +47,8 @@ export async function POST(request: NextRequest) {
       "Challenge": challenge,
       "What Virgin is doing": whatVirginIsDoing,
       "Call to Action": callToAction,
-      "Links": links
+      "Links": links,
+      "Reward": reward
     };
 
     // Add the new challenge to the array
