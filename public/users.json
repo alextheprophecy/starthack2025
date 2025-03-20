@@ -3,6 +3,7 @@
     {
       "email": "user@gmail.com",
       "password": "testing",
+      "userType": "external",
       "points": 150,
       "participatedInitiatives": [
         {
@@ -22,6 +23,7 @@
     {
       "email": "alex@gmail.com",
       "password": "testing",
+      "userType": "external",
       "points": 75,
       "participatedInitiatives": [
         {
@@ -47,6 +49,35 @@
     {
       "email": "test@gmail.com",
       "password": "testing",
+      "userType": "external",
+      "points": 0,
+      "participatedInitiatives": []
+    },
+    {
+      "email": "khoshimov2018@gmail.com",
+      "password": "Tillo2018@@@",
+      "userType": "external",
+      "points": 0,
+      "participatedInitiatives": []
+    },
+    {
+      "email": "internal@virgingroup.com",
+      "password": "internalpass",
+      "userType": "internal",
+      "points": 0,
+      "participatedInitiatives": []
+    },
+    {
+      "email": "employee@virginatl.com",
+      "password": "employee123",
+      "userType": "internal",
+      "points": 0,
+      "participatedInitiatives": []
+    },
+    {
+      "email": "r.khoshimov@gmail.com",
+      "password": "Tillo2018@",
+      "userType": "internal",
       "points": 0,
       "participatedInitiatives": []
     }

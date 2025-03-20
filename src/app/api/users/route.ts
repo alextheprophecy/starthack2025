@@ -36,7 +36,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, userType = 'external', firstName, lastName, company, position } = body;
     
     if (!email || !password) {
       return NextResponse.json(
@@ -48,15 +48,53 @@ export async function POST(request: Request) {
     const data = readUsersFile();
     
     // Check if user already exists
-    if (data.users.some((user: any) => user.email === email)) {
+    const existingUserIndex = data.users.findIndex((user: any) => user.email === email);
+    
+    if (existingUserIndex >= 0) {
+      // If we're updating an existing user
+      if (body.isUpdate) {
+        // Update user data but keep password if not provided
+        const existingUser = data.users[existingUserIndex];
+        data.users[existingUserIndex] = { 
+          ...existingUser,
+          ...(firstName !== undefined && { firstName }),
+          ...(lastName !== undefined && { lastName }),
+          ...(company !== undefined && { company }),
+          ...(position !== undefined && { position }),
+          ...(password !== undefined && { password })
+        };
+        
+        // Write updated data back to file
+        const success = writeUsersFile(data);
+        
+        if (success) {
+          return NextResponse.json({ success: true, message: 'User updated successfully' });
+        } else {
+          return NextResponse.json(
+            { success: false, message: 'Failed to update user' },
+            { status: 500 }
+          );
+        }
+      }
+      
       return NextResponse.json(
         { success: false, message: 'User already exists' },
         { status: 409 }
       );
     }
     
-    // Add new user
-    data.users.push({ email, password });
+    // Add new user with userType and additional fields
+    data.users.push({ 
+      email, 
+      password, 
+      userType,
+      firstName: firstName || "",
+      lastName: lastName || "",
+      company: company || "",
+      position: position || "",
+      points: 0,
+      participatedInitiatives: []
+    });
     
     // Write updated data back to file
     const success = writeUsersFile(data);
@@ -70,7 +108,7 @@ export async function POST(request: Request) {
       );
     }
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error('Error creating/updating user:', error);
     return NextResponse.json(
       { success: false, message: 'Server error' },
       { status: 500 }

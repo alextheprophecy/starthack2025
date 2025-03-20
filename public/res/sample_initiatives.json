@@ -145,11 +145,11 @@
   },
   {
     "uid": "challenge-17",
-    "Virgin Company": "test company",
-    "Initiaitive": "fhewf ",
-    "Challenge": "fewo f",
-    "What Virgin is doing": "fewklf",
-    "Call to Action": "dnqk",
-    "Links": "dnqkl"
+    "Virgin Company": "Virgin Galactic",
+    "Initiaitive": "Space Debris Mitigation",
+    "Challenge": "Space debris is a growing concern for orbital operations and future space missions. As we increase our presence in space, managing orbital debris becomes critical for sustainable space exploration.",
+    "What Virgin is doing": "Virgin Galactic is pioneering a new orbital cleanup initiative using advanced robotics and AI to identify, track, and safely deorbit space debris. We're also implementing new design standards for all our spacecraft to minimize debris creation.",
+    "Call to Action": "- Join our space sustainability webinar series\n- Support space debris research through our foundation\n- Advocate for international space debris reduction policies",
+    "Links": "https://www.virgingalactic.com/sustainability\nhttps://space-sustainability-forum.org"
   }
 ]

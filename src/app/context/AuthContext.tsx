@@ -5,17 +5,27 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 type User = {
   email: string;
   userType: 'internal' | 'external';
+  firstName?: string;
+  lastName?: string;
+  company?: string;
+  position?: string;
 };
 
 type UserData = {
   email: string;
   password: string;
+  userType?: 'internal' | 'external';
+  firstName?: string;
+  lastName?: string;
+  company?: string;
+  position?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string, userType: 'internal' | 'external') => Promise<boolean>;
-  signup: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, userType: 'internal' | 'external') => Promise<boolean>;
+  updateProfile: (userData: Partial<UserData>) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -43,7 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       
       if (foundUser) {
-        const userData = { email: foundUser.email, userType };
+        // Use the stored userType if available, otherwise use the provided userType
+        const actualUserType = foundUser.userType || userType;
+        
+        // Only allow login if the user is trying to login with the correct userType
+        if (actualUserType !== userType) {
+          console.error("User type mismatch");
+          return false;
+        }
+        
+        // Include additional profile information in the user object
+        const userData = { 
+          email: foundUser.email, 
+          userType: actualUserType,
+          firstName: foundUser.firstName,
+          lastName: foundUser.lastName,
+          company: foundUser.company,
+          position: foundUser.position
+        };
         setUser(userData);
         sessionStorage.setItem("user", JSON.stringify(userData));
         return true;
@@ -55,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (email: string, password: string) => {
+  const signup = async (email: string, password: string, userType: 'internal' | 'external' = 'external') => {
     try {
       // Create a new user through the API
       const response = await fetch("/api/users", {
@@ -63,14 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, userType }),
       });
       
       const result = await response.json();
       
       if (result.success) {
-        // Set the current user - default to external type for new signups
-        const userData = { email, userType: 'external' as const };
+        // Set the current user with specified userType
+        const userData = { email, userType };
         setUser(userData);
         sessionStorage.setItem("user", JSON.stringify(userData));
         return true;
@@ -82,6 +109,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
   };
+  
+  const updateProfile = async (userData: Partial<UserData>) => {
+    try {
+      if (!user) return false;
+      
+      // Make sure we have the current user's email
+      const updateData = {
+        ...userData,
+        email: user.email,
+        isUpdate: true
+      };
+      
+      // Update user through the API
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update the current user state with new profile data
+        const updatedUser = {
+          ...user,
+          ...userData
+        };
+        setUser(updatedUser);
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      return false;
+    }
+  };
 
   const logout = () => {
     setUser(null);
@@ -89,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );

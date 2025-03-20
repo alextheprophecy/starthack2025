@@ -118,12 +118,21 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <main className="container mx-auto p-6 mt-10">
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      <main className="container mx-auto p-6 mt-10 overflow-x-hidden">
         <h2 className="text-4xl font-bold mb-2 text-gray-800 text-center">Our Initiatives</h2>
-        <p className="text-xl text-gray-600 mb-8 text-center">Find all the different initiatives of the Virgin companies and find out how to contribute!</p>
+        <p className="text-xl text-gray-600 mb-4 text-center">Find all the different initiatives of the Virgin companies and find out how to contribute!</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
+        <div className="flex justify-center mb-8">
+          <button 
+            onClick={() => router.push('/customer')}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors"
+          >
+            Visit the Customer Dashboard
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense overflow-hidden">
           {orderedCompanies.map((company, index) => {
             // Force first two cards to be small, others follow criteria
             const isLarge = index < 2 ? false : company.initiatives.length > 5;
