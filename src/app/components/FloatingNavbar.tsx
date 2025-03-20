@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FloatingNavbar = () => {
   const router = useRouter();
@@ -37,12 +38,9 @@ const FloatingNavbar = () => {
 
   return (
     <>
-      {/* Full-width background to cover the black area */}
-      <div className="fixed top-0 left-0 right-0 h-20 bg-white z-40"></div>
-      
       {/* Floating navbar */}
-      <div className="fixed top-2 left-0 right-0 z-50 mx-auto px-4">
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-[0_0_10px_rgba(0,0,0,0.1)] py-1 px-3 flex items-center justify-between">
+      <div className="fixed top-4 left-0 right-0 z-50 mx-auto px-4">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.2)] py-1 px-3 flex items-center justify-between">
           {/* Left section - empty now */}
           <div className="w-1/3"></div>
           
@@ -64,7 +62,7 @@ const FloatingNavbar = () => {
           </div>
           
           {/* Right section */}
-          <div className="w-1/3 flex justify-end items-center">
+          <div className="w-1/3 flex justify-end items-center pr-2">
             {user && (
               <div className="relative" ref={dropdownRef}>
                 <button 
@@ -73,27 +71,35 @@ const FloatingNavbar = () => {
                   aria-expanded={dropdownOpen}
                   aria-label="User profile menu"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </button>
                 
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg py-1 z-10">
-                    <button 
-                      onClick={handleMyInitiatives}
-                      className="block w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-red-50 hover:text-red-600"
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div 
+                      className="absolute left-0 top-full mt-6 w-40 bg-white rounded-xl shadow-lg py-2 z-10"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
                     >
-                      My Initiatives
-                    </button>
-                    <button 
-                      onClick={handleLogout}
-                      className="block w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-red-50 hover:text-red-600"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                      <button 
+                        onClick={handleMyInitiatives}
+                        className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
+                      >
+                        My Initiatives
+                      </button>
+                      <button 
+                        onClick={handleLogout}
+                        className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
+                      >
+                        Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>

@@ -106,8 +106,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <main className="container mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Our Initiatives</h2>
+      <main className="container mx-auto p-6 mt-10">
+        <h2 className="text-4xl font-bold mb-6 text-gray-800 text-center">Our Initiatives</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {companyInitiatives.map((company, index) => (
