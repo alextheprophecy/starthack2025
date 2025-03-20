@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 type User = {
   email: string;
+  userType: 'internal' | 'external';
 };
 
 type UserData = {
@@ -13,7 +14,7 @@ type UserData = {
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, userType: 'internal' | 'external') => Promise<boolean>;
   signup: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 };
@@ -31,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, userType: 'internal' | 'external') => {
     try {
       // Get users from the API/JSON file
       const response = await fetch("/api/users");
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       
       if (foundUser) {
-        const userData = { email: foundUser.email };
+        const userData = { email: foundUser.email, userType };
         setUser(userData);
         sessionStorage.setItem("user", JSON.stringify(userData));
         return true;
@@ -68,8 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await response.json();
       
       if (result.success) {
-        // Set the current user
-        const userData = { email };
+        // Set the current user - default to external type for new signups
+        const userData = { email, userType: 'external' as const };
         setUser(userData);
         sessionStorage.setItem("user", JSON.stringify(userData));
         return true;

@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState<'external' | 'internal'>('external');
   
   const { login, user } = useAuth();
   const router = useRouter();
@@ -17,7 +18,11 @@ export default function Login() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      router.push("/");
+      if (user.userType === 'internal') {
+        router.push("/internal");
+      } else {
+        router.push("/");
+      }
     }
   }, [user, router]);
 
@@ -32,11 +37,15 @@ export default function Login() {
     try {
       setError("");
       setLoading(true);
-      const success = await login(email, password);
+      const success = await login(email, password, userType);
       
       if (success) {
-        // Immediate redirection without waiting for the next render
-        window.location.href = "/";
+        // Redirect based on user type
+        if (userType === 'internal') {
+          window.location.href = "/internal";
+        } else {
+          window.location.href = "/";
+        }
       } else {
         setError("Invalid email or password");
       }
@@ -46,6 +55,10 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleUserType = () => {
+    setUserType(userType === 'external' ? 'internal' : 'external');
   };
 
   return (
@@ -89,6 +102,27 @@ export default function Login() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-gray-900"
               placeholder="••••••••"
             />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <label className="flex items-center">
+              <span className="mr-2 text-sm text-gray-700">User Mode:</span>
+              <div
+                onClick={toggleUserType}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                  userType === 'internal' ? 'bg-red-600' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    userType === 'internal' ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </div>
+              <span className="ml-2 text-sm font-medium text-gray-700">
+                {userType === 'internal' ? 'Internal Employee' : 'External User'}
+              </span>
+            </label>
           </div>
           
           <div>

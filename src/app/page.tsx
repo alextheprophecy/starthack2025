@@ -24,6 +24,8 @@ export default function Home() {
   useEffect(() => {
     if (!user) {
       router.push("/login");
+    } else if (user.userType === 'internal') {
+      router.push("/internal");
     } else {
       // Fetch and parse the CSV data
       fetch('/res/sample_initiatives.csv')
@@ -57,8 +59,8 @@ export default function Home() {
     }
   }, [user, router]);
 
-  // Don't render the page content if not authenticated
-  if (!user) {
+  // Don't render the page content if not authenticated or if internal user
+  if (!user || user.userType === 'internal') {
     return null;
   }
 
