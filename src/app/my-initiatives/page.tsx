@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ImpactForest from "../components/ImpactForest";
+import CountUp from "react-countup";
 
 type Initiative = {
   company: string;
@@ -38,6 +39,12 @@ export default function MyInitiatives() {
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userInitiatives, setUserInitiatives] = useState<InitiativeWithParticipation[]>([]);
+  const [isCountingActive, setIsCountingActive] = useState(false);
+  const [categoryPoints, setCategoryPoints] = useState({
+    environmental: 0,
+    social: 0,
+    innovation: 0
+  });
 
   useEffect(() => {
     if (!user) {
@@ -89,6 +96,17 @@ export default function MyInitiatives() {
                   };
                 });
                 setUserInitiatives(userInitiativesWithDetails);
+                
+                // Calculate points by category (simplified mock calculation)
+                const environmental = Math.round(currentUser.points * 0.35); // 35% of total points
+                const social = Math.round(currentUser.points * 0.40); // 40% of total points
+                const innovation = Math.round(currentUser.points * 0.25); // 25% of total points
+                
+                setCategoryPoints({
+                  environmental,
+                  social,
+                  innovation
+                });
               })
               .catch(error => console.error('Error loading initiatives:', error));
           }
@@ -96,6 +114,46 @@ export default function MyInitiatives() {
         .catch(error => console.error('Error loading user data:', error));
     }
   }, [user, router]);
+
+  // Add keyframes animation for the pulsing effect
+  useEffect(() => {
+    // Define the pulsing animation if it doesn't exist yet
+    if (!document.querySelector('#count-pulse-animation')) {
+      const style = document.createElement('style');
+      style.id = 'count-pulse-animation';
+      style.innerHTML = `
+        @keyframes countPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+        }
+        @keyframes countPulseCategory {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+        }
+        .count-pulse-active {
+          animation: countPulse 0.8s ease-in-out infinite;
+        }
+        .count-pulse-category-active {
+          animation: countPulseCategory 0.8s ease-in-out infinite;
+        }
+        .wave-shape {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          overflow: hidden;
+          line-height: 0;
+        }
+        .wave-shape svg {
+          position: relative;
+          display: block;
+          width: calc(100% + 1.3px);
+          height: 24px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
 
   if (!user || !userData) {
     return null;
@@ -131,36 +189,141 @@ export default function MyInitiatives() {
       </header>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Points Overview Section */}
+        {/* Main Points Overview with Redemption Options */}
         <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-6 sm:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Points Display */}
-              <div className="flex flex-col justify-center items-center p-6 bg-red-50 rounded-lg">
-                <div className="text-3xl font-bold text-red-600 mb-2">{userData.points}</div>
-                <div className="text-sm text-gray-600 font-medium">Total Points</div>
+          <div className="relative">
+            {/* Red background shape cutout */}
+            <div className="absolute inset-0 bg-red-600 h-32 rounded-t-xl"></div>
+            
+            {/* Wave shape for curved edge */}
+            <div className="wave-shape" style={{ bottom: '-1px', transform: 'rotate(180deg)' }}>
+              <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#DC2626"></path>
+              </svg>
+            </div>
+            
+            <div className="relative p-6 sm:p-8 pt-16">
+              {/* Virgin logo on the background */}
+              <div className="absolute top-4 right-8 opacity-30">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L6 12L12 22L18 12L12 2Z" fill="white" />
+                </svg>
               </div>
               
-              {/* Redeem Points Buttons */}
-              <div className="md:col-span-2 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <button 
-                  onClick={() => window.open("https://www.virgin.com/virgin-red", "_blank")}
-                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg shadow-sm hover:from-red-700 hover:to-red-600 transition-all flex items-center justify-center gap-2 font-medium"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Redeem in Virgin Red
-                </button>
-                <button 
-                  onClick={() => window.open("https://www.virginhotels.com", "_blank")}
-                  className="w-full sm:w-auto px-6 py-3 bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2 font-medium"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  Use at Virgin Hotels
-                </button>
+              {/* Total Points and Redemption Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Total Points Display - Larger, prominent */}
+                <div className="flex flex-col justify-center items-center p-8 bg-white rounded-xl shadow-lg -mt-16 border-2 border-red-100 relative z-10">
+                  <div 
+                    className={`text-5xl font-bold mb-3 transition-all duration-300 ease-in-out ${
+                      isCountingActive 
+                        ? 'text-red-500 count-pulse-active' 
+                        : 'text-red-600'
+                    }`}
+                  >
+                    <CountUp 
+                      end={userData.points} 
+                      duration={2.5} 
+                      separator="," 
+                      onStart={() => setIsCountingActive(true)}
+                      onEnd={() => setIsCountingActive(false)}
+                      className="inline-block"
+                      delay={0.2}
+                      useEasing={true}
+                    />
+                  </div>
+                  <div className="text-sm uppercase font-semibold tracking-wider text-gray-600">Total Points</div>
+                </div>
+                
+                {/* Redeem Points Buttons - next to total points */}
+                <div className="md:col-span-2 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <button 
+                    onClick={() => window.open("https://www.virgin.com/virgin-red", "_blank")}
+                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg shadow-sm hover:from-red-700 hover:to-red-600 transition-all flex items-center justify-center gap-2 font-medium transform hover:scale-105"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Redeem in Virgin Red
+                  </button>
+                  <button 
+                    onClick={() => window.open("https://www.virginhotels.com", "_blank")}
+                    className="w-full sm:w-auto px-6 py-3 bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 transition-all flex items-center justify-center gap-2 font-medium transform hover:scale-105"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Use at Virgin Hotels
+                  </button>
+                </div>
+              </div>
+              
+              {/* Category Points Section - Side by side under total points */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
+                {/* Section title */}
+                <div className="sm:col-span-3 mb-0">
+                  <h3 className="text-lg font-semibold text-gray-700">Points by Category</h3>
+                </div>
+                
+                {/* Environmental Points */}
+                <div className="flex flex-col justify-center items-center p-6 bg-green-50 rounded-lg shadow-sm transition-transform hover:shadow-md hover:-translate-y-1 border border-green-100">
+                  <div 
+                    className={`text-3xl font-bold mb-2 transition-all duration-300 ease-in-out ${
+                      isCountingActive 
+                        ? 'text-green-500 count-pulse-category-active' 
+                        : 'text-green-600'
+                    }`}
+                  >
+                    <CountUp 
+                      end={categoryPoints.environmental} 
+                      duration={2.5} 
+                      separator="," 
+                      delay={0.3}
+                      useEasing={true}
+                    />
+                  </div>
+                  <div className="text-sm uppercase font-medium tracking-wide text-green-800">Environmental</div>
+                </div>
+                
+                {/* Social Good Points */}
+                <div className="flex flex-col justify-center items-center p-6 bg-amber-50 rounded-lg shadow-sm transition-transform hover:shadow-md hover:-translate-y-1 border border-amber-100">
+                  <div 
+                    className={`text-3xl font-bold mb-2 transition-all duration-300 ease-in-out ${
+                      isCountingActive 
+                        ? 'text-amber-500 count-pulse-category-active' 
+                        : 'text-amber-600'
+                    }`}
+                  >
+                    <CountUp 
+                      end={categoryPoints.social} 
+                      duration={2.5} 
+                      separator="," 
+                      delay={0.4}
+                      useEasing={true}
+                    />
+                  </div>
+                  <div className="text-sm uppercase font-medium tracking-wide text-amber-800">Social Impact</div>
+                </div>
+                
+                {/* Innovation Points */}
+                <div className="flex flex-col justify-center items-center p-6 bg-blue-50 rounded-lg shadow-sm transition-transform hover:shadow-md hover:-translate-y-1 border border-blue-100">
+                  <div 
+                    className={`text-3xl font-bold mb-2 transition-all duration-300 ease-in-out ${
+                      isCountingActive 
+                        ? 'text-blue-500 count-pulse-category-active' 
+                        : 'text-blue-600'
+                    }`}
+                  >
+                    <CountUp 
+                      end={categoryPoints.innovation} 
+                      duration={2.5} 
+                      separator="," 
+                      delay={0.5}
+                      useEasing={true}
+                    />
+                  </div>
+                  <div className="text-sm uppercase font-medium tracking-wide text-blue-800">Innovation</div>
+                </div>
               </div>
             </div>
           </div>
