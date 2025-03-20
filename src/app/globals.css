@@ -43,7 +43,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -51,6 +51,13 @@
   --color-foreground: var(--foreground);
   --font-sans: 'HelveticaNeue', Helvetica, Arial, sans-serif;
   --font-mono: 'HelveticaNeue', Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #ededed;
+  }
 }
 
 body {
