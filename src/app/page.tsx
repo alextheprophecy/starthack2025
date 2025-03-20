@@ -120,7 +120,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto p-6 mt-10">
-        <h2 className="text-4xl font-bold mb-6 text-gray-800 text-center">Our Initiatives</h2>
+        <h2 className="text-4xl font-bold mb-2 text-gray-800 text-center">Our Initiatives</h2>
+        <p className="text-xl text-gray-600 mb-8 text-center">Find all the different initiatives of the Virgin companies and find out how to contribute!</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
           {orderedCompanies.map((company, index) => {
