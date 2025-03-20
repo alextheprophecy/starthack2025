@@ -40,7 +40,7 @@ const FloatingNavbar = () => {
     <>
       {/* Floating navbar */}
       <div className="fixed top-4 left-0 right-0 z-50 mx-auto px-4">
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.2)] py-1 px-3 flex items-center justify-between relative before:absolute before:content-[''] before:inset-[4px] before:rounded-[22px] before:border before:border-red-600 before:pointer-events-none">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.2)] py-1 px-3 flex items-center justify-between relative before:absolute before:content-[''] before:inset-[4px] before:rounded-[22px] before:border before:border-red-600 before:pointer-events-none">
           {/* Left section - empty now */}
           <div className="w-1/3"></div>
           
@@ -79,7 +79,7 @@ const FloatingNavbar = () => {
                 <AnimatePresence>
                   {dropdownOpen && (
                     <motion.div 
-                      className="absolute left-0 top-full mt-6 w-40 bg-white rounded-xl shadow-lg py-2 z-10"
+                      className="absolute left-0 top-full mt-6 w-40 bg-white dark:bg-white rounded-xl shadow-lg py-2 z-10"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
