@@ -199,8 +199,6 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
     <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
      <div className="p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-2">Your Impact Forest</h2>
-        <p className="text-sm text-gray-600 mb-4">Watch your forest grow as you participate in more initiatives. Each plant represents an initiative you&apos;ve contributed to.</p>
-      
         <div className="relative w-full" style={{ paddingBottom: "30%" }}>
             <div className="absolute inset-0 overflow-hidden">
                 {/* Perspectived Grid */}
@@ -281,8 +279,8 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
           </div>
         )})}
             </div>
-        </div>
-        
+        </div>        
+       
     </div>
     </div>
   );
