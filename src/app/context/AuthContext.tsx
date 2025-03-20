@@ -1,15 +1,11 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { User as UserData } from "../api/utils";
 
 type User = {
   email: string;
   userType: 'internal' | 'external';
-};
-
-type UserData = {
-  email: string;
-  password: string;
 };
 
 type AuthContextType = {

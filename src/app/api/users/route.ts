@@ -1,30 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const usersFilePath = path.join(process.cwd(), 'public', 'users.json');
-
-// Helper function to read the users file
-function readUsersFile() {
-  try {
-    const fileContents = fs.readFileSync(usersFilePath, 'utf8');
-    return JSON.parse(fileContents);
-  } catch (error) {
-    console.error('Error reading users file:', error);
-    return { users: [] };
-  }
-}
-
-// Helper function to write to the users file
-function writeUsersFile(data: any) {
-  try {
-    fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Error writing users file:', error);
-    return false;
-  }
-}
+import { readUsersFile, writeUsersFile, User } from '../utils';
 
 // GET /api/users - Get all users
 export async function GET() {
@@ -48,15 +23,29 @@ export async function POST(request: Request) {
     const data = readUsersFile();
     
     // Check if user already exists
-    if (data.users.some((user: any) => user.email === email)) {
+    if (data.users.some((user: User) => user.email === email)) {
       return NextResponse.json(
         { success: false, message: 'User already exists' },
         { status: 409 }
       );
     }
     
+    // Get max ID to generate a new unique ID
+    const maxId = data.users.length > 0 
+      ? Math.max(...data.users.map(user => user.id))
+      : 0;
+    
     // Add new user
-    data.users.push({ email, password });
+    const newUser: User = {
+      id: maxId + 1,
+      email,
+      password,
+      points: 0,
+      friends: [],
+      participatedInitiatives: []
+    };
+    
+    data.users.push(newUser);
     
     // Write updated data back to file
     const success = writeUsersFile(data);

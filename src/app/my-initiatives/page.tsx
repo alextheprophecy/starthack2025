@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import ImpactForest from "../components/ImpactForest";
 import CountUp from "react-countup";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 type Initiative = {
   company: string;
@@ -14,6 +15,7 @@ type Initiative = {
   solution: string;
   callToAction: string;
   links: string[];
+  type: 'environmental' | 'social' | 'innovation';
 };
 
 type UserInitiative = {
@@ -36,7 +38,7 @@ type InitiativeWithParticipation = Initiative & {
 };
 
 export default function MyInitiatives() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userInitiatives, setUserInitiatives] = useState<InitiativeWithParticipation[]>([]);
@@ -73,6 +75,11 @@ export default function MyInitiatives() {
                     // Split by comma but handle commas within quotes
                     const matches = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
                     if (matches && matches.length >= 6) {
+                      // Assign a type based on the initiative index (for demo purposes)
+                      // In a real app, this would come from your data source
+                      const types: Array<'environmental' | 'social' | 'innovation'> = ['environmental', 'social', 'innovation'];
+                      const initiativeType = types[i % 3];
+                      
                       const initiative: Initiative = {
                         company: matches[0].replace(/"/g, ''),
                         initiative: matches[1].replace(/"/g, ''),
@@ -80,6 +87,7 @@ export default function MyInitiatives() {
                         solution: matches[3].replace(/"/g, ''),
                         callToAction: matches[4].replace(/"/g, ''),
                         links: matches[5].replace(/"/g, '').split('\n').map(link => link.trim()).filter(Boolean),
+                        type: initiativeType
                       };
                       parsedInitiatives.push(initiative);
                     }
@@ -159,11 +167,6 @@ export default function MyInitiatives() {
   if (!user || !userData) {
     return null;
   }
-
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -276,7 +279,12 @@ export default function MyInitiatives() {
                       delay={0.3}
                     />
                   </div>
-                  <div className="text-sm uppercase font-medium tracking-wide text-green-800">Environmental</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 relative">
+                      <Image src="/images/tree2.png" alt="Environmental Icon" width={24} height={24} className="object-contain" />
+                    </div>
+                    <div className="text-sm uppercase font-medium tracking-wide text-green-800">Environmental</div>
+                  </div>
                 </motion.div>
                 
                 {/* Social Good Points - Middle layer */}
@@ -307,7 +315,12 @@ export default function MyInitiatives() {
                       useEasing={true}
                     />
                   </div>
-                  <div className="text-sm uppercase font-medium tracking-wide text-amber-800">Social Impact</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 relative">
+                      <Image src="/images/sunflower.png" alt="Social Icon" width={22} height={22} className="object-contain" />
+                    </div>
+                    <div className="text-sm uppercase font-medium tracking-wide text-amber-800">Social Impact</div>
+                  </div>
                 </motion.div>
                 
                 {/* Innovation Points - Bottom layer */}
@@ -338,7 +351,12 @@ export default function MyInitiatives() {
                       useEasing={true}
                     />
                   </div>
-                  <div className="text-sm uppercase font-medium tracking-wide text-blue-800">Innovation</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 relative">
+                      <Image src="/images/solar2.png" alt="Innovation Icon" width={24} height={24} className="object-contain" />
+                    </div>
+                    <div className="text-sm uppercase font-medium tracking-wide text-blue-800">Innovation</div>
+                  </div>
                 </motion.div>
               </div>
             </div>
@@ -346,7 +364,7 @@ export default function MyInitiatives() {
         </div>
 
         {/* Forest Visualization Section */}
-        <ImpactForest initiatives={userInitiatives.length} />
+        <ImpactForest initiatives={userInitiatives} />
 
         {/* Initiatives Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -383,6 +401,16 @@ export default function MyInitiatives() {
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                           +{initiative.pointsEarned} pts
                         </span>
+                        {initiative.type && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            initiative.type === 'environmental' ? 'bg-green-100 text-green-800' : 
+                            initiative.type === 'social' ? 'bg-amber-100 text-amber-800' : 
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {initiative.type === 'environmental' ? 'Environmental' : 
+                             initiative.type === 'social' ? 'Social' : 'Innovation'}
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{initiative.initiative}</p>
                       <div className="flex items-center gap-2 text-sm text-gray-500">

@@ -36,6 +36,11 @@ const FloatingNavbar = () => {
     setDropdownOpen(false);
   };
 
+  const handleSocials = () => {
+    router.push("/socials");
+    setDropdownOpen(false);
+  };
+
   return (
     <>
       {/* Floating navbar */}
@@ -90,6 +95,12 @@ const FloatingNavbar = () => {
                         className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
                       >
                         My Initiatives
+                      </button>
+                      <button 
+                        onClick={handleSocials}
+                        className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
+                      >
+                        Socials
                       </button>
                       <button 
                         onClick={handleLogout}

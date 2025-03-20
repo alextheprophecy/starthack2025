@@ -1,9 +1,11 @@
 {
   "users": [
     {
+      "id": 1,
       "email": "user@gmail.com",
       "password": "testing",
       "points": 150,
+      "friends": [2, 3],
       "participatedInitiatives": [
         {
           "initiativeId": 1,
@@ -20,9 +22,11 @@
       ]
     },
     {
+      "id": 2,
       "email": "alex@gmail.com",
       "password": "testing",
       "points": 75,
+      "friends": [1],
       "participatedInitiatives": [
         {
           "initiativeId": 3,
@@ -45,9 +49,11 @@
       ]
     },
     {
+      "id": 3,
       "email": "test@gmail.com",
       "password": "testing",
       "points": 0,
+      "friends": [1],
       "participatedInitiatives": []
     }
   ]
