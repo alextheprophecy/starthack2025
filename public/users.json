@@ -1,0 +1,54 @@
+{
+  "users": [
+    {
+      "email": "user@gmail.com",
+      "password": "testing",
+      "points": 150,
+      "participatedInitiatives": [
+        {
+          "initiativeId": 1,
+          "dateParticipated": "2024-03-15",
+          "pointsEarned": 50,
+          "contribution": "Participated in fuel efficiency workshop"
+        },
+        {
+          "initiativeId": 5,
+          "dateParticipated": "2024-02-20",
+          "pointsEarned": 100,
+          "contribution": "Volunteered at digital skills training session"
+        }
+      ]
+    },
+    {
+      "email": "alex@gmail.com",
+      "password": "testing",
+      "points": 75,
+      "participatedInitiatives": [
+        {
+          "initiativeId": 3,
+          "dateParticipated": "2024-03-10",
+          "pointsEarned": 75,
+          "contribution": "Led community fitness class"
+        },
+        {
+          "initiativeId": 2,
+          "dateParticipated": "2024-03-10",
+          "pointsEarned": 150,
+          "contribution": "Sold my phone"
+        },
+        {
+          "initiativeId": 1,
+          "dateParticipated": "2024-03-10",
+          "pointsEarned": 75,
+          "contribution": "Led community fitness class"
+        }
+      ]
+    },
+    {
+      "email": "test@gmail.com",
+      "password": "testing",
+      "points": 0,
+      "participatedInitiatives": []
+    }
+  ]
+}
