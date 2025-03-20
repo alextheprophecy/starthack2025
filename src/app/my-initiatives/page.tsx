@@ -167,28 +167,6 @@ export default function MyInitiatives() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="w-full bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-bold text-red-600">Virgin Initiatives</h1>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push("/")}
-                className="px-4 py-2 text-red-600 hover:text-red-700 transition-colors text-sm font-medium"
-              >
-                Browse All Initiatives
-              </button>
-              <button 
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main Points Overview with Redemption Options */}
         <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">

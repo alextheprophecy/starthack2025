@@ -13,10 +13,29 @@ type Initiative = {
   links: string[];
 };
 
+type InitiativeWithCount = {
+  initiative: string;
+  count: number;
+};
+
+type CompanyInitiatives = {
+  company: string;
+  initiatives: InitiativeWithCount[];
+};
+
 export default function Home() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
+  const [companyInitiatives, setCompanyInitiatives] = useState<CompanyInitiatives[]>([]);
+  
+  // Background images for cards
+  const backgroundImages = [
+    "/images/balloon.jpeg",
+    "/images/plane.jpg",
+    "/images/rocket.jpg",
+    "/images/boat.jpg"
+  ];
 
   useEffect(() => {
     if (!user) {
@@ -24,33 +43,52 @@ export default function Home() {
     } else if (user.userType === 'internal') {
       router.push("/internal");
     } else {
-      // Fetch and parse the CSV data
-      fetch('/res/sample_initiatives.csv')
-        .then(response => response.text())
-        .then(csvText => {
-          const lines = csvText.split('\n');
-          const parsedInitiatives: Initiative[] = [];
-          
-          // Skip the header row (index 0)
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line) {
-              // Split by comma but handle commas within quotes
-              const matches = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-              if (matches && matches.length >= 6) {
-                const initiative: Initiative = {
-                  company: matches[0].replace(/"/g, ''),
-                  initiative: matches[1].replace(/"/g, ''),
-                  challenge: matches[2].replace(/"/g, ''),
-                  solution: matches[3].replace(/"/g, ''),
-                  callToAction: matches[4].replace(/"/g, ''),
-                  links: matches[5].replace(/"/g, '').split('\n').map(link => link.trim()).filter(Boolean),
-                };
-                parsedInitiatives.push(initiative);
-              }
-            }
-          }
+      // Fetch and parse the JSON data
+      fetch('/res/sample_initiatives.json')
+        .then(response => response.json())
+        .then(data => {
+          // Map JSON keys to our Initiative type
+          const parsedInitiatives: Initiative[] = data.map((item: any) => ({
+            company: item['Virgin Company'],
+            initiative: item['Initiaitive'],
+            challenge: item['Challenge'],
+            whatVirginIsDoing: item['What Virgin is doing'],
+            callToAction: item['Call to Action'],
+            links: item['Links']
+              ? item['Links'].split('\n').map((link: string) => link.trim()).filter(Boolean)
+              : []
+          }));
+
           setInitiatives(parsedInitiatives);
+
+          // Create a map to deduplicate and count initiatives for each company
+          const initiativeMap = new Map<string, Map<string, number>>();
+
+          parsedInitiatives.forEach(initiative => {
+            const companies = initiative.company.split('&').map(c => c.trim());
+            companies.forEach(companyName => {
+              if (!initiativeMap.has(companyName)) {
+                initiativeMap.set(companyName, new Map());
+              }
+              const compInitiatives = initiativeMap.get(companyName)!;
+              compInitiatives.set(
+                initiative.initiative,
+                (compInitiatives.get(initiative.initiative) || 0) + 1
+              );
+            });
+          });
+
+          const groupedInitiatives: CompanyInitiatives[] = [];
+          initiativeMap.forEach((initiatives, company) => {
+            const initiativeList: InitiativeWithCount[] = [];
+            initiatives.forEach((count, initiativeName) => {
+              initiativeList.push({ initiative: initiativeName, count });
+            });
+            groupedInitiatives.push({ company, initiatives: initiativeList });
+          });
+
+          console.log('Grouped initiatives:', JSON.stringify(groupedInitiatives, null, 2));
+          setCompanyInitiatives(groupedInitiatives);
         })
         .catch(error => console.error('Error loading initiatives:', error));
     }
@@ -66,79 +104,67 @@ export default function Home() {
     router.push("/login");
   };
 
+  // Reorder companies so that the first row (first two cards) are small if possible
+  const orderedCompanies = [...companyInitiatives];
+  for (let pos = 0; pos < 2 && pos < orderedCompanies.length; pos++) {
+    if (orderedCompanies[pos].initiatives.length > 5) {
+      const swapIndex = orderedCompanies.findIndex((company, idx) => idx >= 2 && company.initiatives.length <= 5);
+      if (swapIndex !== -1) {
+        const temp = orderedCompanies[pos];
+        orderedCompanies[pos] = orderedCompanies[swapIndex];
+        orderedCompanies[swapIndex] = temp;
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      <header className="w-full flex justify-between items-center p-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold text-red-600">Virgin Initiatives</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Welcome, {user.email}</span>
-          <button 
-            onClick={() => router.push("/my-initiatives")}
-            className="px-4 py-2 text-red-600 hover:text-red-700 transition-colors text-sm"
-          >
-            My Initiatives
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-      
-      <main className="container mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Our Initiatives</h2>
+      <main className="container mx-auto p-6 mt-10">
+        <h2 className="text-4xl font-bold mb-2 text-gray-800 text-center">Our Initiatives</h2>
+        <p className="text-xl text-gray-600 mb-8 text-center">Find all the different initiatives of the Virgin companies and find out how to contribute!</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {initiatives.map((item, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <div className="bg-red-600 text-white p-3">
-                <h3 className="font-bold">{item.company}</h3>
-              </div>
-              <div className="p-4">
-                <h4 className="text-lg font-semibold text-red-600 mb-2">{item.initiative}</h4>
-                
-                <div className="mb-3">
-                  <h5 className="text-sm font-semibold text-gray-700">Challenge:</h5>
-                  <p className="text-sm text-gray-600">{item.challenge}</p>
-                </div>
-                
-                <div className="mb-3">
-                  <h5 className="text-sm font-semibold text-gray-700">What Virgin is doing:</h5>
-                  <p className="text-sm text-gray-600">{item.solution}</p>
-                </div>
-                
-                {item.callToAction && (
-                  <div className="mb-4">
-                    <h5 className="text-sm font-semibold text-gray-700">Call to Action:</h5>
-                    <p className="text-sm text-gray-600">{item.callToAction}</p>
-                  </div>
-                )}
-                
-                {item.links && item.links.length > 0 && (
-                  <div className="mt-3">
-                    <h5 className="text-sm font-semibold text-gray-700">Learn More:</h5>
-                    <div className="flex flex-col gap-1 mt-1">
-                      {item.links.map((link, i) => (
-                        link && (
-                          <a 
-                            key={i} 
-                            href={link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-red-600 hover:underline truncate"
-                          >
-                            {link}
-                          </a>
-                        )
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
+          {orderedCompanies.map((company, index) => {
+            // Force first two cards to be small, others follow criteria
+            const isLarge = index < 2 ? false : company.initiatives.length > 5;
+            return (
+              <div 
+                key={index} 
+                className={`rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-96 ${isLarge ? 'md:col-span-2' : ''}`}
+                style={{ 
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${backgroundImages[index % backgroundImages.length]})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                <div className="h-full flex flex-col p-6">
+                  <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">{company.company}</h3>
+                  <div className="flex-grow overflow-y-auto px-2">
+                    <ul className={`space-y-3 ${isLarge ? 'grid grid-cols-2 gap-x-4 gap-y-3 space-y-0' : ''}`}>
+                      {company.initiatives.map((initiative, i) => (
+                        <li
+                          key={i}
+                          className="text-xl text-white hover:text-red-300 transition-colors cursor-pointer flex items-start"
+                          onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`View initiative ${initiative.initiative}`}
+                        >
+                          <span className="mr-2">•</span>
+                          <span>{initiative.initiative} {initiative.count > 1 && `(${initiative.count})`}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
     </div>
