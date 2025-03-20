@@ -10,34 +10,80 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
   const trees = useMemo(() => {
     // Define the four corner trees that form our trapezium
     const cornerTrees = [
-      { x: 5, y: 0, size: 1 },    // Top left
-      { x: 12, y: 52, size: 1 },  // Bottom left
-      { x: 95, y: 0, size: 1 },   // Top right
-      { x: 88, y: 52, size: 1 }   // Bottom right
+      { x: 5, y: 2, size: 1, adjustedY: 0 },    // Top left
+      { x: 12, y: 52, size: 1, adjustedY: 52 },  // Bottom left
+      { x: 88, y: 2, size: 1, adjustedY: 0 },   // Top right
+      { x: 85, y: 52, size: 1, adjustedY: 52 }   // Bottom right
     ];
     
-    const result = [...cornerTrees];
+    // Initialize empty result array (no corner trees)
+    const result = [];
     
-    // Generate additional random trees within the trapezium
-    for (let i = 0; i < 50; i++) {
-      // Get a random point along both the top and bottom edges
-      const topEdgeRatio = Math.random();
-      const bottomEdgeRatio = Math.random();
+    // Define grid dimensions
+    const gridCols = 10;
+    const gridRows = 6;
+    
+    // Create a grid of potential tree locations
+    const grid = [];
+    
+    // Fill the grid with coordinates
+    for (let row = 0; row < gridRows; row++) {
+      for (let col = 0; col < gridCols; col++) {
+        // Calculate vertical position (y) with non-linear distribution
+        // This creates more space between rows as we move toward the bottom
+        const verticalRatio = Math.pow(row / (gridRows - 1), 0.8); // Non-linear distribution
+        const yPos = verticalRatio * 52;
+        
+        // Calculate left edge x position at this y level
+        const leftEdgeX = cornerTrees[0].x + verticalRatio * (cornerTrees[1].x - cornerTrees[0].x);
+        // Calculate right edge x position at this y level
+        const rightEdgeX = cornerTrees[2].x + verticalRatio * (cornerTrees[3].x - cornerTrees[2].x);
+        
+        // Calculate horizontal position (x) based on column
+        const horizontalRatio = col / (gridCols - 1);
+        // Add offset to alternating rows for better tree visibility
+        const rowOffset = row % 2 === 0 ? 0 : (1 / gridCols) * 0.5;
+        const xPos = leftEdgeX + (horizontalRatio + rowOffset) * (rightEdgeX - leftEdgeX);
+        
+        // Skip the exact corner positions
+        const isCorner = (row === 0 && col === 0) || 
+                        (row === 0 && col === gridCols - 1) ||
+                        (row === gridRows - 1 && col === 0) ||
+                        (row === gridRows - 1 && col === gridCols - 1);
+                        
+        if (!isCorner) {
+          grid.push({ x: xPos, y: yPos });
+        }
+      }
+    }
+    
+    // Shuffle the grid positions to randomly select positions
+    const shuffledGrid = [...grid].sort(() => Math.random() - 0.5);
+    
+    // Take as many positions as needed (or all if fewer than initiatives)
+    const treesToPlace = Math.min(200, shuffledGrid.length);
+    
+    // Add trees to the result
+    for (let i = 0; i < treesToPlace; i++) {
+      // Calculate size based on y position - trees closer to the viewer (higher y) are larger
+      const baseSize = 0.8;
+      const sizeVariation = 0.2;
+      const proximityFactor = 1 - (shuffledGrid[i].y / 52); // 1 at bottom (y=0), 0 at top (y=52)
+      const sizeBoost = proximityFactor * 0.4; // Up to 0.4 size increase for closest trees
       
-      // Calculate points on top and bottom edges using linear interpolation
-      const topX = cornerTrees[0].x + topEdgeRatio * (cornerTrees[2].x - cornerTrees[0].x);
-      const bottomX = cornerTrees[1].x + bottomEdgeRatio * (cornerTrees[3].x - cornerTrees[1].x);
+      // Calculate perspective-adjusted y position
+      // This will make trees that are further away (higher y) appear higher up
+      const adjustedY = shuffledGrid[i].y;
       
-      // Get a random point between these vertical positions
-      const verticalRatio = Math.random();
-      const finalX = topX + verticalRatio * (bottomX - topX);
-      const finalY = 0 + verticalRatio * (52);
+      // Add subtle random offsets to make the forest look more natural
+      const xOffset = (Math.random() - 0.5) * 5; // -1 to +1 percent offset
+      const yOffset = (Math.random() - 0.5) * 2 // -1 to +1 percent offset
       
-      // Add the tree with some size variation
-      result.push({ 
-        x: finalX, 
-        y: finalY, 
-        size: Math.random() * 0.3 + 1 
+      result.push({
+        x: shuffledGrid[i].x + xOffset,
+        y: shuffledGrid[i].y + yOffset,
+        adjustedY: adjustedY + yOffset,
+        size: baseSize + sizeVariation * Math.random() + sizeBoost
       });
     }
     
@@ -69,7 +115,7 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
             className="absolute pointer-events-none "
             style={{
               left: `${tree.x}%`,
-              bottom: `${tree.y}%`,
+              bottom: `${tree.adjustedY}%`,
               transform: `translateX(-50%) scale(${tree.size})`,
               transformOrigin: 'center bottom',
               width: '80px',
