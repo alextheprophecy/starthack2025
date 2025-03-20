@@ -3,6 +3,7 @@
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ImpactForest from "../components/ImpactForest";
 
 type Initiative = {
   company: string;
@@ -164,6 +165,9 @@ export default function MyInitiatives() {
             </div>
           </div>
         </div>
+
+        {/* Forest Visualization Section */}
+        <ImpactForest initiatives={userInitiatives.length} />
 
         {/* Initiatives Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
