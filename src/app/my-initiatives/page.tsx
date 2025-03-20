@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ImpactForest from "../components/ImpactForest";
 import CountUp from "react-countup";
+import { motion } from "framer-motion";
 
 type Initiative = {
   company: string;
@@ -213,7 +214,7 @@ export default function MyInitiatives() {
               {/* Total Points and Redemption Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Total Points Display - Larger, prominent */}
-                <div className="flex flex-col justify-center items-center p-8 bg-white rounded-xl shadow-lg -mt-16 border-2 border-red-100 relative z-10">
+                <div className="flex flex-col justify-center items-center p-8 bg-white rounded-xl shadow-lg border-2 border-red-100 relative z-10">
                   <div 
                     className={`text-5xl font-bold mb-3 transition-all duration-300 ease-in-out ${
                       isCountingActive 
@@ -235,11 +236,11 @@ export default function MyInitiatives() {
                   <div className="text-sm uppercase font-semibold tracking-wider text-gray-600">Total Points</div>
                 </div>
                 
-                {/* Redeem Points Buttons - next to total points */}
-                <div className="md:col-span-2 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                {/* Redeem Points Buttons - now stacked next to total points */}
+                <div className="flex flex-col gap-4 justify-center">
                   <button 
                     onClick={() => window.open("https://www.virgin.com/virgin-red", "_blank")}
-                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg shadow-sm hover:from-red-700 hover:to-red-600 transition-all flex items-center justify-center gap-2 font-medium transform hover:scale-105"
+                    className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg shadow-sm hover:from-red-700 hover:to-red-600 transition-all flex items-center justify-center gap-2 font-medium transform hover:scale-105 border-2 border-white"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -248,7 +249,7 @@ export default function MyInitiatives() {
                   </button>
                   <button 
                     onClick={() => window.open("https://www.virginhotels.com", "_blank")}
-                    className="w-full sm:w-auto px-6 py-3 bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 transition-all flex items-center justify-center gap-2 font-medium transform hover:scale-105"
+                    className="w-full px-6 py-3 bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 transition-all flex items-center justify-center gap-2 font-medium transform hover:scale-105"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -256,17 +257,33 @@ export default function MyInitiatives() {
                     Use at Virgin Hotels
                   </button>
                 </div>
+                
+                <div className="hidden md:block"></div>
               </div>
               
               {/* Category Points Section - Side by side under total points */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
-                {/* Section title */}
-                <div className="sm:col-span-3 mb-0">
-                  <h3 className="text-lg font-semibold text-gray-700">Points by Category</h3>
-                </div>
-                
-                {/* Environmental Points */}
-                <div className="flex flex-col justify-center items-center p-6 bg-green-50 rounded-lg shadow-sm transition-transform hover:shadow-md hover:-translate-y-1 border border-green-100">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6 relative">
+                {/* Environmental Points - Top layer */}
+                <motion.div 
+                  initial={{ y: -50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{
+                    y: {
+                      delay: 0.3,
+                      duration: 0.4,
+                      type: "spring",
+                      stiffness: 130,
+                      damping: 15
+                    },
+                    opacity: {
+                      duration: 0.15,
+                      delay: 0.3,
+                      ease: "easeIn"
+                    }
+                  }}
+                  className="flex flex-col justify-center items-center p-6 bg-green-50 rounded-lg shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 border border-green-100 relative z-30"
+                  style={{ transform: "translateZ(20px)" }}
+                >
                   <div 
                     className={`text-3xl font-bold mb-2 transition-all duration-300 ease-in-out ${
                       isCountingActive 
@@ -279,14 +296,24 @@ export default function MyInitiatives() {
                       duration={2.5} 
                       separator="," 
                       delay={0.3}
-                      useEasing={true}
                     />
                   </div>
                   <div className="text-sm uppercase font-medium tracking-wide text-green-800">Environmental</div>
-                </div>
+                </motion.div>
                 
-                {/* Social Good Points */}
-                <div className="flex flex-col justify-center items-center p-6 bg-amber-50 rounded-lg shadow-sm transition-transform hover:shadow-md hover:-translate-y-1 border border-amber-100">
+                {/* Social Good Points - Middle layer */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{
+                    opacity: {
+                      duration: 0.4,
+                      delay: 0.6,
+                    }
+                  }}
+                  className="flex flex-col justify-center items-center p-6 bg-amber-50 rounded-lg shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 border border-amber-100 relative z-20"
+                  style={{ transform: "translateZ(10px)" }}
+                >
                   <div 
                     className={`text-3xl font-bold mb-2 transition-all duration-300 ease-in-out ${
                       isCountingActive 
@@ -303,10 +330,21 @@ export default function MyInitiatives() {
                     />
                   </div>
                   <div className="text-sm uppercase font-medium tracking-wide text-amber-800">Social Impact</div>
-                </div>
+                </motion.div>
                 
-                {/* Innovation Points */}
-                <div className="flex flex-col justify-center items-center p-6 bg-blue-50 rounded-lg shadow-sm transition-transform hover:shadow-md hover:-translate-y-1 border border-blue-100">
+                {/* Innovation Points - Bottom layer */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{
+                    opacity: {
+                      duration: 0.4,
+                      delay: 0.8,
+                    }
+                  }}
+                  className="flex flex-col justify-center items-center p-6 bg-blue-50 rounded-lg shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 border border-blue-100 relative z-10"
+                  style={{ transform: "translateZ(0px)" }}
+                >
                   <div 
                     className={`text-3xl font-bold mb-2 transition-all duration-300 ease-in-out ${
                       isCountingActive 
@@ -323,7 +361,7 @@ export default function MyInitiatives() {
                     />
                   </div>
                   <div className="text-sm uppercase font-medium tracking-wide text-blue-800">Innovation</div>
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>

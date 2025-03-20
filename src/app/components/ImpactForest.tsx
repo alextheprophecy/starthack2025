@@ -1,13 +1,26 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 type ImpactForestProps = {
   initiatives: number;  // Number of initiatives to show trees for
 };
 
+type TreePosition = {
+  x: number;
+  y: number;
+  adjustedY: number;
+  size: number;
+};
+
 export default function ImpactForest({ initiatives }: ImpactForestProps) {
-  // Generate tree positions based on initiatives count
-  const trees = useMemo(() => {
+  const [grownTrees, setGrownTrees] = useState<number[]>([]);
+  const treesRef = useRef<TreePosition[]>([]);
+  const hasInitialized = useRef(false);
+
+  // Generate tree positions based on initiatives count, but only once
+  useEffect(() => {
+    if (hasInitialized.current) return;
+    
     // Define the four corner trees that form our trapezium
     const cornerTrees = [
       { x: 5, y: 2, size: 1, adjustedY: 0 },    // Top left
@@ -17,7 +30,7 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
     ];
     
     // Initialize empty result array (no corner trees)
-    const result = [];
+    const result: TreePosition[] = [];
     
     // Define grid dimensions
     const gridCols = 10;
@@ -67,7 +80,6 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
     for (let i = 0; i < treesToPlace; i++) {
       // Calculate size based on y position - trees closer to the viewer (higher y) are larger
       const baseSize = 1;
-      const sizeVariation = 0.2;
       const proximityFactor = 1 - (shuffledGrid[i].y / 52); // 1 at bottom (y=0), 0 at top (y=52)
       const sizeBoost = proximityFactor * 0.4; // Up to 0.4 size increase for closest trees
       
@@ -83,12 +95,30 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
         x: shuffledGrid[i].x + xOffset,
         y: shuffledGrid[i].y + yOffset,
         adjustedY: adjustedY + yOffset,
-        size: baseSize + sizeVariation * Math.random() + sizeBoost
+        size: baseSize + sizeBoost
       });
     }
     
-    return result;
+    treesRef.current = result;
+    hasInitialized.current = true;
+    
+    // Start animation after trees are positioned
+    animateTrees();
   }, [initiatives]);
+
+  // Function to animate tree growth
+  const animateTrees = () => {
+    if (treesRef.current.length === 0) return;
+    
+    let delay = 100; // Initial delay
+    
+    treesRef.current.forEach((_, index) => {
+      setTimeout(() => {
+        setGrownTrees(prev => [...prev, index]);
+      }, delay);
+      delay += 150; // Increment delay for next tree
+    });
+  };
 
   return (
     <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
@@ -109,28 +139,31 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
                 >                    
                 </div>
                 {/* Trees */}
-        {trees.map((tree, index) => (
+        {treesRef.current.map((tree, index) => (
           <div 
             key={index}
-            className="absolute transition-all duration-150 group"
+            className="absolute transition-all duration-500 group"
             style={{
               left: `${tree.x}%`,
               bottom: `${tree.adjustedY}%`,
-              transform: `translateX(-50%) scale(${tree.size})`,
+              transform: `translateX(-50%) scale(${grownTrees.includes(index) ? tree.size : 0})`,
               transformOrigin: 'center bottom',
               width: '80px',
               height: '100px',
               zIndex: Math.floor(100 - tree.y),
+              transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Spring effect
             }}
           >
             {/* Shadow */}
             <div 
-              className="absolute left-1/2 -translate-x-1/2"
+              className="absolute left-1/2 -translate-x-1/2 transition-all duration-500"
               style={{
                 bottom: '-3px',
                 width: '70px',
                 height: '25px',
                 zIndex: Math.floor(100 - tree.y) - 1,
+                opacity: grownTrees.includes(index) ? 0.4 : 0,
+                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Spring effect
               }}
             >
               <Image
@@ -138,7 +171,7 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
                 alt="Shadow"
                 width={50}
                 height={15}
-                className="w-full h-full  opacity-40"
+                className="w-full h-full"
               />
             </div>
             
