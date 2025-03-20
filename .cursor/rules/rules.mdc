@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- make sure to follow the theme of the website which is Red color theme, like the virgin websites.
+- Make title in bold and big font size.
+- for every button and clickable area, the cursor should change on hover.
