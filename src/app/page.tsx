@@ -13,10 +13,29 @@ type Initiative = {
   links: string[];
 };
 
+type InitiativeWithCount = {
+  name: string;
+  count: number;
+};
+
+type CompanyInitiatives = {
+  company: string;
+  initiatives: InitiativeWithCount[];
+};
+
 export default function Home() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
+  const [companyInitiatives, setCompanyInitiatives] = useState<CompanyInitiatives[]>([]);
+  
+  // Background images for cards
+  const backgroundImages = [
+    "/images/balloon.jpeg",
+    "/images/plane.jpg",
+    "/images/rocket.jpg",
+    "/images/boat.jpg"
+  ];
 
   useEffect(() => {
     if (!user) {
@@ -51,6 +70,39 @@ export default function Home() {
             }
           }
           setInitiatives(parsedInitiatives);
+          
+          // Create a map to deduplicate and count initiatives
+          const initiativeMap = new Map<string, Map<string, number>>();
+          
+          // Count initiatives by company and name
+          parsedInitiatives.forEach(initiative => {
+            if (!initiativeMap.has(initiative.company)) {
+              initiativeMap.set(initiative.company, new Map());
+            }
+            
+            const companyMap = initiativeMap.get(initiative.company)!;
+            const currentCount = companyMap.get(initiative.initiative) || 0;
+            companyMap.set(initiative.initiative, currentCount + 1);
+          });
+          
+          // Convert map to the expected format
+          const groupedInitiatives: CompanyInitiatives[] = [];
+          
+          initiativeMap.forEach((initiatives, company) => {
+            const initiativeList: InitiativeWithCount[] = [];
+            
+            initiatives.forEach((count, name) => {
+              initiativeList.push({ name, count });
+            });
+            
+            groupedInitiatives.push({
+              company,
+              initiatives: initiativeList
+            });
+          });
+          
+          console.log('Grouped initiatives:', JSON.stringify(groupedInitiatives, null, 2));
+          setCompanyInitiatives(groupedInitiatives);
         })
         .catch(error => console.error('Error loading initiatives:', error));
     }
@@ -90,52 +142,40 @@ export default function Home() {
       <main className="container mx-auto p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Our Initiatives</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {initiatives.map((item, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <div className="bg-red-600 text-white p-3">
-                <h3 className="font-bold">{item.company}</h3>
-              </div>
-              <div className="p-4">
-                <h4 className="text-lg font-semibold text-red-600 mb-2">{item.initiative}</h4>
-                
-                <div className="mb-3">
-                  <h5 className="text-sm font-semibold text-gray-700">Challenge:</h5>
-                  <p className="text-sm text-gray-600">{item.challenge}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {companyInitiatives.map((company, index) => (
+            <div 
+              key={index} 
+              className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-96"
+              style={{ 
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${backgroundImages[index % backgroundImages.length]})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="h-full flex flex-col p-6">
+                <h3 className="text-5xl font-extrabold text-white mb-8 tracking-tight">{company.company}</h3>
+                <div className="flex-grow overflow-y-auto px-2">
+                  <ul className="space-y-3">
+                    {company.initiatives.map((initiative, i) => (
+                      <li 
+                        key={i} 
+                        className="text-xl font-semibold text-white hover:text-red-300 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.name)}`)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.name)}`);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`View details for ${initiative.name}`}
+                      >
+                        {initiative.name} {initiative.count > 1 && `(${initiative.count})`}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                
-                <div className="mb-3">
-                  <h5 className="text-sm font-semibold text-gray-700">What Virgin is doing:</h5>
-                  <p className="text-sm text-gray-600">{item.solution}</p>
-                </div>
-                
-                {item.callToAction && (
-                  <div className="mb-4">
-                    <h5 className="text-sm font-semibold text-gray-700">Call to Action:</h5>
-                    <p className="text-sm text-gray-600">{item.callToAction}</p>
-                  </div>
-                )}
-                
-                {item.links && item.links.length > 0 && (
-                  <div className="mt-3">
-                    <h5 className="text-sm font-semibold text-gray-700">Learn More:</h5>
-                    <div className="flex flex-col gap-1 mt-1">
-                      {item.links.map((link, i) => (
-                        link && (
-                          <a 
-                            key={i} 
-                            href={link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-red-600 hover:underline truncate"
-                          >
-                            {link}
-                          </a>
-                        )
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ))}
