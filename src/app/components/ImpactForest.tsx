@@ -26,6 +26,9 @@ const VISUAL_SETTINGS = {
   }
 };
 
+// Scale factor for profile view
+const PROFILE_VIEW_SCALE = 0.8;
+
 type Initiative = {
   company: string;
   initiative: string;
@@ -52,6 +55,7 @@ type ImpactForestProps = {
     pointsEarned: number;
     contribution: string;
   }[];  // Accept either Initiative[] or InitiativeWithParticipation[]
+  isProfileView?: boolean; // New parameter to indicate if this is shown on a profile page
 };
 
 type TreePosition = {
@@ -62,7 +66,7 @@ type TreePosition = {
   type: 'environmental' | 'social' | 'innovation';
 };
 
-export default function ImpactForest({ initiatives }: ImpactForestProps) {
+export default function ImpactForest({ initiatives, isProfileView = false }: ImpactForestProps) {
   const [grownTrees, setGrownTrees] = useState<number[]>([]);
   const treesRef = useRef<TreePosition[]>([]);
   const hasInitialized = useRef(false);
@@ -195,11 +199,18 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
     return VISUAL_SETTINGS[type];
   };
 
+  // Calculate actual scale based on whether this is a profile view
+  const getActualScale = (baseScale: number) => {
+    return isProfileView ? baseScale * PROFILE_VIEW_SCALE : baseScale;
+  };
+
   return (
     <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
      <div className="p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Your Impact Forest</h2>
-        <div className="relative w-full" style={{ paddingBottom: "30%" }}>
+        {!isProfileView && (
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Your Impact Forest</h2>
+        )}
+        <div className="relative w-full" style={{ paddingBottom: isProfileView ? "25%" : "30%" }}>
             <div className="absolute inset-0 overflow-hidden">
                 {/* Perspectived Grid */}
                 <div 
@@ -222,6 +233,8 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
                 {/* Initiative Items */}
         {treesRef.current.map((item, index) => {
           const visualSettings = getVisualSettings(item.type);
+          const actualScale = getActualScale(item.size * visualSettings.scale);
+          
           return (
           <div 
             key={index}
@@ -229,7 +242,7 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
             style={{
               left: `${item.x + visualSettings.xOffset}%`,
               bottom: `${item.adjustedY}%`, // Base position without yOffset
-              transform: `translateX(-50%) scale(${grownTrees.includes(index) ? item.size * visualSettings.scale : 0})`, // Restore scale
+              transform: `translateX(-50%) scale(${grownTrees.includes(index) ? actualScale : 0})`, // Apply adjusted scale
               transformOrigin: 'center bottom',
               width: `${visualSettings.width}px`,
               height: `${visualSettings.height}px`,
