@@ -79,7 +79,7 @@ const FloatingNavbar = () => {
                 <AnimatePresence>
                   {dropdownOpen && (
                     <motion.div 
-                      className="absolute left-0 top-full mt-6 w-40 bg-white rounded-xl shadow-lg py-2 z-10"
+                      className="absolute left-0 top-full mt-6 w-40 bg-white dark:bg-white rounded-xl shadow-lg py-2 z-10"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
