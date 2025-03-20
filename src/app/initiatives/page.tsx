@@ -1,14 +1,16 @@
 "use client";
 
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+// Define types for initiatives
 
 type Initiative = {
   company: string;
   initiative: string;
   challenge: string;
-  solution: string;
+  whatVirginIsDoing?: string;
   callToAction: string;
   links: string[];
 };
@@ -23,12 +25,11 @@ type CompanyInitiatives = {
   initiatives: InitiativeWithCount[];
 };
 
-export default function Home() {
+export default function InitiativesPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   const [companyInitiatives, setCompanyInitiatives] = useState<CompanyInitiatives[]>([]);
-  const [showAll, setShowAll] = useState(false);
   
   // Background images for cards
   const backgroundImages = [
@@ -121,15 +122,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto p-6 mt-10">
+        {/* Featured Initiatives Section with black title */}
         <h2 className="text-4xl font-bold mb-2 text-black text-center">Initiatives we think you'll love</h2>
         <p className="text-xl text-gray-600 mb-8 text-center">We recommend these initiatives based on your interests and preferences.</p>
+
         <div 
           className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow mb-16 w-full cursor-pointer"
           style={{ 
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)), url(/images/underwater.jpg)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            height: '300px'
+            height: '400px'
           }}
         >
           <div className="h-full flex p-6">
@@ -142,6 +145,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
+            
             <div className="w-1/2 pl-4">
               <h3 className="text-5xl font-extrabold text-white mb-6 tracking-tight">Virgin Voyages</h3>
               <div className="mt-4 space-y-3">
@@ -157,10 +161,13 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <h2 className="text-4xl font-bold mb-2 text-black text-center">More initiatives</h2>
-        <p className="text-xl text-gray-600 mb-8 text-center">Personalized initiatives for you.</p>
+        
+        <h2 className="text-4xl font-bold mb-2 text-black text-center">Our Initiatives</h2>
+        <p className="text-xl text-gray-600 mb-8 text-center">Find all the different initiatives of the Virgin companies and find out how to contribute!</p>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
-          {(showAll ? orderedCompanies : orderedCompanies.slice(0, 3)).map((company, index) => {
+          {orderedCompanies.map((company, index) => {
+            // Force first two cards to be small, others follow criteria
             const isLarge = index < 2 ? false : company.initiatives.length > 5;
             return (
               <div 
@@ -181,7 +188,11 @@ export default function Home() {
                           key={i}
                           className="text-xl text-white hover:text-red-300 transition-colors cursor-pointer flex items-start"
                           onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`); } }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`);
+                            }
+                          }}
                           tabIndex={0}
                           role="button"
                           aria-label={`View initiative ${initiative.initiative}`}
@@ -197,14 +208,7 @@ export default function Home() {
             );
           })}
         </div>
-        {!showAll && (
-          <div className="flex justify-center mt-10">
-            <button onClick={() => setShowAll(true)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-              View All Initiatives
-            </button>
-          </div>
-        )}
       </main>
     </div>
   );
-}
+} 
