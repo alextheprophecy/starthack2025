@@ -1,8 +1,62 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
+// Constants for visual customization of different initiative types
+const VISUAL_SETTINGS = {
+  environmental: {
+    scale: 1,
+    xOffset: 0,
+    yOffset: 6,
+    width: 80,
+    height: 100
+  },
+  social: {
+    scale: 0.55, // Smaller scale for flowers
+    xOffset: 0,
+    yOffset: 7, // Lift flowers up a bit
+    width: 70,
+    height: 90
+  },
+  innovation: {
+    scale: 0.9, // Slightly smaller scale for solar panels
+    xOffset: 0,
+    yOffset: 0, // Move solar panels down a bit
+    width: 85,
+    height: 85
+  }
+};
+
+// Scale factor for profile view
+const PROFILE_VIEW_SCALE = 0.8;
+
+type Initiative = {
+  company: string;
+  initiative: string;
+  challenge: string;
+  solution: string;
+  callToAction: string;
+  links: string[];
+  type: 'environmental' | 'social' | 'innovation';
+  dateParticipated: string;
+  pointsEarned: number;
+  contribution: string;
+};
+
 type ImpactForestProps = {
-  initiatives: number;  // Number of initiatives to show trees for
+  initiatives: Initiative[] | { 
+    company: string;
+    initiative: string; 
+    challenge: string;
+    solution: string;
+    callToAction: string;
+    links: string[];
+    type: 'environmental' | 'social' | 'innovation';
+    dateParticipated: string;
+    pointsEarned: number;
+    contribution: string;
+  }[];  // Accept either Initiative[] or InitiativeWithParticipation[]
+  isProfileView?: boolean; // New parameter to indicate if this is shown on a profile page
+  seed?: number; // Optional seed for random number generation
 };
 
 type TreePosition = {
@@ -10,12 +64,20 @@ type TreePosition = {
   y: number;
   adjustedY: number;
   size: number;
+  type: 'environmental' | 'social' | 'innovation';
 };
 
-export default function ImpactForest({ initiatives }: ImpactForestProps) {
+export default function ImpactForest({ initiatives, isProfileView = false, seed }: ImpactForestProps) {
   const [grownTrees, setGrownTrees] = useState<number[]>([]);
   const treesRef = useRef<TreePosition[]>([]);
   const hasInitialized = useRef(false);
+
+  // New seededRandom function that uses an offset
+  const seededRandom = (max: number, min: number = 0, offset: number = 0) => {
+    if (!seed) return min + Math.random() * (max - min);
+    const x = Math.sin(seed + offset) * 10000;
+    return min + (x - Math.floor(x)) * (max - min);
+  };
 
   // Generate tree positions based on initiatives count, but only once
   useEffect(() => {
@@ -70,11 +132,12 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
       }
     }
     
-    // Shuffle the grid positions to randomly select positions
-    const shuffledGrid = [...grid].sort(() => Math.random() - 0.5);
+    // New grid shuffling using seeded random with offset
+    const gridWithRand = grid.map((item, index) => ({ ...item, rand: seededRandom(1, 0, index) }));
+    const shuffledGrid = gridWithRand.sort((a, b) => a.rand - b.rand).map(item => ({ x: item.x, y: item.y }));
     
     // Take as many positions as needed (or all if fewer than initiatives)
-    const treesToPlace = Math.min(30, shuffledGrid.length);
+    const treesToPlace = Math.min(30, Math.max(initiatives.length, shuffledGrid.length));
     
     // Add trees to the result
     for (let i = 0; i < treesToPlace; i++) {
@@ -87,15 +150,19 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
       // This will make trees that are further away (higher y) appear higher up
       const adjustedY = shuffledGrid[i].y;
       
-      // Add subtle random offsets to make the forest look more natural
-      const xOffset = (Math.random() - 0.5) * 5; // -1 to +1 percent offset
-      const yOffset = (Math.random() - 0.5) * 2 // -1 to +1 percent offset
+      // New code for offsets and type using offset in seededRandom
+      const xOffset = (seededRandom(1, 0, i + 1000) - 0.5) * 5; // -2.5 to +2.5 offset
+      const yOffset = (seededRandom(1, 0, i + 2000) - 0.5) * 2; // -1 to +1 offset
+      const type = i < initiatives.length 
+        ? initiatives[i].type 
+        : ['environmental', 'social', 'innovation'][Math.floor(seededRandom(3, 0, i + 3000))] as 'environmental' | 'social' | 'innovation';
       
       result.push({
         x: shuffledGrid[i].x + xOffset,
         y: shuffledGrid[i].y + yOffset,
         adjustedY: adjustedY + yOffset,
-        size: baseSize + sizeBoost
+        size: baseSize + sizeBoost,
+        type: type
       });
     }
     
@@ -104,7 +171,7 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
     
     // Start animation after trees are positioned
     animateTrees();
-  }, [initiatives]);
+  }, [initiatives, seed]);
 
   // Function to animate tree growth
   const animateTrees = () => {
@@ -120,37 +187,73 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
     });
   };
 
+  // Get the appropriate image source based on initiative type
+  const getImageSrc = (type: 'environmental' | 'social' | 'innovation') => {
+    switch (type) {
+      case 'environmental':
+        return '/images/tree2.png';
+      case 'social':
+        return '/images/sunflower.png';
+      case 'innovation':
+        return '/images/solar2.png';
+      default:
+        return '/images/tree2.png';
+    }
+  };
+
+  // Get visual settings for the item based on its type
+  const getVisualSettings = (type: 'environmental' | 'social' | 'innovation') => {
+    return VISUAL_SETTINGS[type];
+  };
+
+  // Calculate actual scale based on whether this is a profile view
+  const getActualScale = (baseScale: number) => {
+    return isProfileView ? baseScale * PROFILE_VIEW_SCALE : baseScale;
+  };
+
   return (
     <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="border-b border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-800">Your Impact Forest</h2>
-      </div>
      <div className="p-6">
-        <div className="relative w-full" style={{ paddingBottom: "30%" }}>
+        {!isProfileView && (
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Your Impact Forest</h2>
+        )}
+        <div className="relative w-full" style={{ paddingBottom: isProfileView ? "25%" : "30%" }}>
             <div className="absolute inset-0 overflow-hidden">
                 {/* Perspectived Grid */}
                 <div 
                     className="absolute inset-0 bg-green-50"
                     style={{
-                    background: "linear-gradient(to bottom, #f0f7dc 0%, #e7f7d2 100%)",
+                    background: "linear-gradient(to bottom, #f0f9e4 0%, #d7efc2 60%, #c5e5a5 100%)",
                     transform: "perspective(700px) rotateX(30deg)",
                     transformOrigin: "center bottom",
                     }}
-                >                    
+                >   
+                  {/* Grid lines for perspective effect */}
+                  <div className="absolute inset-0" style={{ 
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(0,128,0,0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(0,128,0,0.05) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '5% 10%'
+                  }}></div>             
                 </div>
-                {/* Trees */}
-        {treesRef.current.map((tree, index) => (
+                {/* Initiative Items */}
+        {treesRef.current.map((item, index) => {
+          const visualSettings = getVisualSettings(item.type);
+          const actualScale = getActualScale(item.size * visualSettings.scale);
+          
+          return (
           <div 
             key={index}
             className="absolute transition-all duration-500 group"
             style={{
-              left: `${tree.x}%`,
-              bottom: `${tree.adjustedY}%`,
-              transform: `translateX(-50%) scale(${grownTrees.includes(index) ? tree.size : 0})`,
+              left: `${item.x + visualSettings.xOffset}%`,
+              bottom: `${item.adjustedY}%`, // Base position without yOffset
+              transform: `translateX(-50%) scale(${grownTrees.includes(index) ? actualScale : 0})`, // Apply adjusted scale
               transformOrigin: 'center bottom',
-              width: '80px',
-              height: '100px',
-              zIndex: Math.floor(100 - tree.y),
+              width: `${visualSettings.width}px`,
+              height: `${visualSettings.height}px`,
+              zIndex: Math.floor(100 - item.y),
               transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Spring effect
             }}
           >
@@ -161,7 +264,7 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
                 bottom: '-3px',
                 width: '70px',
                 height: '25px',
-                zIndex: Math.floor(100 - tree.y) - 1,
+                zIndex: Math.floor(100 - item.y) - 1,
                 opacity: grownTrees.includes(index) ? 0.4 : 0,
                 transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Spring effect
               }}
@@ -175,19 +278,29 @@ export default function ImpactForest({ initiatives }: ImpactForestProps) {
               />
             </div>
             
-            <Image
-              src="/images/tree2.png"
-              alt="Tree"
-              width={80}
-              height={100}
-              className="w-full h-full object-contain cursor-pointer"
-            />
-          </div>
-        ))}
+            <div 
+              style={{ 
+                transform: `translateY(${-visualSettings.yOffset}px)`, // Apply yOffset with absolute pixels
+                height: '100%',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-end'
+              }}
+            >
+              <Image
+                src={getImageSrc(item.type)}
+                alt={`${item.type} icon`}
+                width={visualSettings.width}
+                height={visualSettings.height}
+                className="object-contain cursor-pointer hover:scale-110 transition-transform"
+              />
             </div>
-        </div>
-        
-        
+          </div>
+        )})}
+            </div>
+        </div>        
+       
     </div>
     </div>
   );
