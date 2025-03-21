@@ -8,6 +8,9 @@ import CountUp from "react-countup";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
+// Constant seed for forest visualization randomness
+const FOREST_SEED = 150; // This value can be changed to generate different but consistent layouts
+
 type Initiative = {
   company: string;
   initiative: string;
@@ -214,7 +217,7 @@ export default function MyInitiatives() {
                       useEasing={true}
                     />
                   </div>
-                  <div className="text-sm uppercase font-semibold tracking-wider text-gray-600">Total Points</div>
+                  <div className="text-sm uppercase font-semibold tracking-wider text-gray-600">Virgin Points</div>
                 </div>
                 
                 {/* Redeem Points Buttons - now stacked next to total points */}
@@ -364,12 +367,12 @@ export default function MyInitiatives() {
         </div>
 
         {/* Forest Visualization Section */}
-        <ImpactForest initiatives={userInitiatives} />
+        <ImpactForest initiatives={userInitiatives} seed={FOREST_SEED} />
 
         {/* Initiatives Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="border-b border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-800">Your Initiatives</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Your Initiatives</h2>
           </div>
 
           {userInitiatives.length === 0 ? (
@@ -382,7 +385,7 @@ export default function MyInitiatives() {
               <p className="text-gray-600 mb-4">You haven&apos;t participated in any initiatives yet.</p>
               <button
                 onClick={() => router.push("/")}
-                className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-bold cursor-pointer"
               >
                 Browse Available Initiatives
                 <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,35 +397,24 @@ export default function MyInitiatives() {
             <div className="divide-y divide-gray-200">
               {userInitiatives.map((initiative, index) => (
                 <div key={index} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900">{initiative.company}</h3>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          +{initiative.pointsEarned} pts
-                        </span>
+                      <p className="text-2xl font-bold text-gray-900">{initiative.contribution}</p>
+                      <div className="mt-2 flex items-center space-x-2 text-sm text-gray-500">
+                        <span>{initiative.company}</span>
+                        <span>&middot;</span>
+                        <span>{new Date(initiative.dateParticipated).toLocaleDateString()}</span>
                         {initiative.type && (
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            initiative.type === 'environmental' ? 'bg-green-100 text-green-800' : 
-                            initiative.type === 'social' ? 'bg-amber-100 text-amber-800' : 
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {initiative.type === 'environmental' ? 'Environmental' : 
-                             initiative.type === 'social' ? 'Social' : 'Innovation'}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${initiative.type === 'environmental' ? 'bg-green-100 text-green-800' : initiative.type === 'social' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
+                            {initiative.type === 'environmental' ? 'Environmental' : initiative.type === 'social' ? 'Social' : 'Innovation'}
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{initiative.initiative}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {new Date(initiative.dateParticipated).toLocaleDateString()}
-                      </div>
                     </div>
-                    <div className="sm:text-right">
-                      <div className="text-sm font-medium text-gray-900 mb-1">Your Contribution</div>
-                      <p className="text-sm text-gray-600">{initiative.contribution}</p>
+                    <div className="mt-4 sm:mt-0">
+                      <span className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-2xl font-bold cursor-pointer">
+                        +{initiative.pointsEarned} pts
+                      </span>
                     </div>
                   </div>
                 </div>

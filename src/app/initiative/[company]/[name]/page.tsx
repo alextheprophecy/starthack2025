@@ -129,8 +129,7 @@ export default function InitiativeDetails({
           <div>
             <div className="mb-8">
               <div className="flex flex-col md:flex-row md:items-center mb-2">
-                <h2 className="text-5xl font-bold text-gray-800">{decodedName}</h2>
-                
+                <h2 className="text-5xl font-bold text-gray-800">{decodedName}</h2>                
                 <div className="w-full bg-gradient-to-r from-white via-red-100 to-red-200 rounded-lg p-3 mt-4 md:mt-0 md:ml-6">
                   <div className="flex items-center gap-2 justify-end">
                     {demoFriends.map((friend) => (

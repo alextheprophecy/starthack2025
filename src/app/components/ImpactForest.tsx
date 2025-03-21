@@ -56,6 +56,7 @@ type ImpactForestProps = {
     contribution: string;
   }[];  // Accept either Initiative[] or InitiativeWithParticipation[]
   isProfileView?: boolean; // New parameter to indicate if this is shown on a profile page
+  seed?: number; // Optional seed for random number generation
 };
 
 type TreePosition = {
@@ -66,10 +67,17 @@ type TreePosition = {
   type: 'environmental' | 'social' | 'innovation';
 };
 
-export default function ImpactForest({ initiatives, isProfileView = false }: ImpactForestProps) {
+export default function ImpactForest({ initiatives, isProfileView = false, seed }: ImpactForestProps) {
   const [grownTrees, setGrownTrees] = useState<number[]>([]);
   const treesRef = useRef<TreePosition[]>([]);
   const hasInitialized = useRef(false);
+
+  // New seededRandom function that uses an offset
+  const seededRandom = (max: number, min: number = 0, offset: number = 0) => {
+    if (!seed) return min + Math.random() * (max - min);
+    const x = Math.sin(seed + offset) * 10000;
+    return min + (x - Math.floor(x)) * (max - min);
+  };
 
   // Generate tree positions based on initiatives count, but only once
   useEffect(() => {
@@ -124,8 +132,9 @@ export default function ImpactForest({ initiatives, isProfileView = false }: Imp
       }
     }
     
-    // Shuffle the grid positions to randomly select positions
-    const shuffledGrid = [...grid].sort(() => Math.random() - 0.5);
+    // New grid shuffling using seeded random with offset
+    const gridWithRand = grid.map((item, index) => ({ ...item, rand: seededRandom(1, 0, index) }));
+    const shuffledGrid = gridWithRand.sort((a, b) => a.rand - b.rand).map(item => ({ x: item.x, y: item.y }));
     
     // Take as many positions as needed (or all if fewer than initiatives)
     const treesToPlace = Math.min(30, Math.max(initiatives.length, shuffledGrid.length));
@@ -141,14 +150,12 @@ export default function ImpactForest({ initiatives, isProfileView = false }: Imp
       // This will make trees that are further away (higher y) appear higher up
       const adjustedY = shuffledGrid[i].y;
       
-      // Add subtle random offsets to make the forest look more natural
-      const xOffset = (Math.random() - 0.5) * 5; // -1 to +1 percent offset
-      const yOffset = (Math.random() - 0.5) * 2 // -1 to +1 percent offset
-      
-      // Assign type from initiative if available, otherwise use a random type
+      // New code for offsets and type using offset in seededRandom
+      const xOffset = (seededRandom(1, 0, i + 1000) - 0.5) * 5; // -2.5 to +2.5 offset
+      const yOffset = (seededRandom(1, 0, i + 2000) - 0.5) * 2; // -1 to +1 offset
       const type = i < initiatives.length 
         ? initiatives[i].type 
-        : ['environmental', 'social', 'innovation'][Math.floor(Math.random() * 3)] as 'environmental' | 'social' | 'innovation';
+        : ['environmental', 'social', 'innovation'][Math.floor(seededRandom(3, 0, i + 3000))] as 'environmental' | 'social' | 'innovation';
       
       result.push({
         x: shuffledGrid[i].x + xOffset,
@@ -164,7 +171,7 @@ export default function ImpactForest({ initiatives, isProfileView = false }: Imp
     
     // Start animation after trees are positioned
     animateTrees();
-  }, [initiatives]);
+  }, [initiatives, seed]);
 
   // Function to animate tree growth
   const animateTrees = () => {
