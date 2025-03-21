@@ -147,7 +147,7 @@ export default function ImpactForest({ initiatives, isProfileView = false, isMyI
     const shuffledGrid = gridWithRand.sort((a, b) => a.rand - b.rand).map(item => ({ x: item.x, y: item.y }));
     
     // Take as many positions as needed (or all if fewer than initiatives)
-    const treesToPlace = Math.min(30, Math.max(initiatives.length, shuffledGrid.length));
+    const treesToPlace = Math.min(isProfileView ? initiatives.length: 30, Math.max(initiatives.length, shuffledGrid.length));
     
     // Add trees to the result
     for (let i = 0; i < treesToPlace; i++) {
