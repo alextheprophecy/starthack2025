@@ -367,7 +367,7 @@ export default function MyInitiatives() {
         </div>
 
         {/* Forest Visualization Section */}
-        <ImpactForest initiatives={userInitiatives} seed={FOREST_SEED} />
+        <ImpactForest initiatives={userInitiatives} seed={FOREST_SEED} isMyInitiativesPage />
 
         {/* Initiatives Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">

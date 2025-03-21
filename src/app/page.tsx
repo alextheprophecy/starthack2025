@@ -156,7 +156,7 @@ export default function Home() {
                role="button"
                aria-label="View saving the turtles initiative"
                style={{ 
-                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/underwater.jpg)`,
+                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/turtles.jpg)`,
                  backgroundSize: 'cover',
                  backgroundPosition: 'center'
                }}>

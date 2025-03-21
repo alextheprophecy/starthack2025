@@ -23,6 +23,13 @@ const VISUAL_SETTINGS = {
     yOffset: 0, // Move solar panels down a bit
     width: 85,
     height: 85
+  },
+  starfish: {
+    scale: 0.65,
+    xOffset: 0,
+    yOffset: 5,
+    width: 75,
+    height: 75
   }
 };
 
@@ -56,6 +63,7 @@ type ImpactForestProps = {
     contribution: string;
   }[];  // Accept either Initiative[] or InitiativeWithParticipation[]
   isProfileView?: boolean; // New parameter to indicate if this is shown on a profile page
+  isMyInitiativesPage?: boolean; // New parameter to indicate if this is shown on the my-initiatives page
   seed?: number; // Optional seed for random number generation
 };
 
@@ -64,13 +72,14 @@ type TreePosition = {
   y: number;
   adjustedY: number;
   size: number;
-  type: 'environmental' | 'social' | 'innovation';
+  type: 'environmental' | 'social' | 'innovation' | 'starfish';
 };
 
-export default function ImpactForest({ initiatives, isProfileView = false, seed }: ImpactForestProps) {
+export default function ImpactForest({ initiatives, isProfileView = false, isMyInitiativesPage = false, seed }: ImpactForestProps) {
   const [grownTrees, setGrownTrees] = useState<number[]>([]);
   const treesRef = useRef<TreePosition[]>([]);
   const hasInitialized = useRef(false);
+  const [showStarfish, setShowStarfish] = useState(false);
 
   // New seededRandom function that uses an offset
   const seededRandom = (max: number, min: number = 0, offset: number = 0) => {
@@ -171,7 +180,16 @@ export default function ImpactForest({ initiatives, isProfileView = false, seed 
     
     // Start animation after trees are positioned
     animateTrees();
-  }, [initiatives, seed]);
+
+    // If we're on the my-initiatives page, add the starfish after all trees have grown
+    if (isMyInitiativesPage) {
+      // Add starfish after all trees have grown
+      const totalDelay = (result.length * 150) + 500; // Additional 500ms buffer
+      setTimeout(() => {
+        setShowStarfish(true);
+      }, totalDelay);
+    }
+  }, [initiatives, seed, isMyInitiativesPage]);
 
   // Function to animate tree growth
   const animateTrees = () => {
@@ -188,7 +206,7 @@ export default function ImpactForest({ initiatives, isProfileView = false, seed 
   };
 
   // Get the appropriate image source based on initiative type
-  const getImageSrc = (type: 'environmental' | 'social' | 'innovation') => {
+  const getImageSrc = (type: 'environmental' | 'social' | 'innovation' | 'starfish') => {
     switch (type) {
       case 'environmental':
         return '/images/tree2.png';
@@ -196,13 +214,15 @@ export default function ImpactForest({ initiatives, isProfileView = false, seed 
         return '/images/sunflower.png';
       case 'innovation':
         return '/images/solar2.png';
+      case 'starfish':
+        return '/images/starfish.png';
       default:
         return '/images/tree2.png';
     }
   };
 
   // Get visual settings for the item based on its type
-  const getVisualSettings = (type: 'environmental' | 'social' | 'innovation') => {
+  const getVisualSettings = (type: 'environmental' | 'social' | 'innovation' | 'starfish') => {
     return VISUAL_SETTINGS[type];
   };
 
@@ -298,6 +318,64 @@ export default function ImpactForest({ initiatives, isProfileView = false, seed 
             </div>
           </div>
         )})}
+
+        {/* Special Starfish for My Initiatives Page */}
+        {isMyInitiativesPage && showStarfish && (
+          <div 
+            className="absolute transition-all duration-500 group"
+            style={{
+              left: '50%',
+              bottom: '20%',
+              transform: 'translateX(-50%) scale(1)',
+              transformOrigin: 'center bottom',
+              width: `${VISUAL_SETTINGS.starfish.width}px`,
+              height: `${VISUAL_SETTINGS.starfish.height}px`,
+              zIndex: 120,
+              transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Spring effect
+              animation: 'appear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}
+          >
+            {/* Shadow */}
+            <div 
+              className="absolute left-1/2 -translate-x-1/2 transition-all duration-500"
+              style={{
+                bottom: '-3px',
+                width: '70px',
+                height: '25px',
+                zIndex: 119,
+                opacity: 0.4,
+                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' // Spring effect
+              }}
+            >
+              <Image
+                src="/images/shadow.png"
+                alt="Shadow"
+                width={50}
+                height={15}
+                className="w-full h-full"
+              />
+            </div>
+            
+            <div 
+              style={{ 
+                transform: `translateY(${-VISUAL_SETTINGS.starfish.yOffset}px)`,
+                height: '100%',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-end'
+              }}
+            >
+              <Image
+                src="/images/starfish.png"
+                alt="Starfish icon"
+                width={VISUAL_SETTINGS.starfish.width}
+                height={VISUAL_SETTINGS.starfish.height}
+                className="object-contain cursor-pointer hover:scale-110 transition-transform"
+              />
+            </div>
+          </div>
+        )}
             </div>
         </div>        
        
