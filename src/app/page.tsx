@@ -3,6 +3,7 @@
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Initiative = {
   company: string;
@@ -30,6 +31,11 @@ export default function Home() {
   const [companyInitiatives, setCompanyInitiatives] = useState<CompanyInitiatives[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [demoLoading, setDemoLoading] = useState(true);
+  
+  // Animation states
+  const [showTitle, setShowTitle] = useState(false);
+  const [showCards, setShowCards] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   
   // Background images for cards
   const backgroundImages = [
@@ -96,6 +102,26 @@ export default function Home() {
     }
   }, [user, router]);
 
+  // Trigger animations when loading is finished
+  useEffect(() => {
+    if (!demoLoading && user && user.userType !== 'internal') {
+      setShowTitle(true);
+      
+      const cardsTimer = setTimeout(() => {
+        setShowCards(true);
+      }, 300);
+      
+      const moreTimer = setTimeout(() => {
+        setShowMore(true);
+      }, 1300);
+      
+      return () => {
+        clearTimeout(cardsTimer);
+        clearTimeout(moreTimer);
+      };
+    }
+  }, [demoLoading, user]);
+
   // Insert demo loading UI before the authentication check
   if (demoLoading) {
     return (
@@ -135,84 +161,125 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto p-6 mt-10">
-        <h2 className="text-4xl font-bold mb-2 text-black text-center">Initiatives we think you'll love</h2>
-        <p className="text-xl text-gray-600 mb-8 text-center">We recommend these initiatives based on your interests and preferences.</p>
+        <AnimatePresence>
+          {showTitle && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-4xl font-bold mb-2 text-black text-center">Initiatives we think you&apos;ll love</h2>
+              <p className="text-xl text-gray-600 mb-8 text-center">We recommend these initiatives based on your interests and preferences.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
-          <div className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-72 cursor-pointer"
-               style={{ 
-                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/underwater.jpg)`,
-                 backgroundSize: 'cover',
-                 backgroundPosition: 'center'
-               }}>
-            <div className="h-full flex flex-col p-6">
-              <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">Virgin Voyages</h3>
-              <p className="text-xl text-white">Recycle ocean plastic waste into clothing</p>
-            </div>
-          </div>
-          <div className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-72 cursor-pointer"
-               onClick={() => router.push('/initiative/Virgin%20Oceans/Saving%20the%20turtles%20initiative')}
-               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push('/initiative/Virgin%20Oceans/Saving%20the%20turtles%20initiative'); } }}
-               tabIndex={0}
-               role="button"
-               aria-label="View saving the turtles initiative"
-               style={{ 
-                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/turtles.jpg)`,
-                 backgroundSize: 'cover',
-                 backgroundPosition: 'center'
-               }}>
-            <div className="h-full flex flex-col p-6">
-              <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">Virgin Oceans</h3>
-              <p className="text-xl text-white">Saving the turtles initiative</p>
-            </div>
-          </div>
-        </div>
-        <h2 className="text-4xl font-bold mb-2 text-black text-center">More initiatives</h2>
-        <p className="text-xl text-gray-600 mb-8 text-center">Personalized initiatives for you.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
-          {(showAll ? orderedCompanies : orderedCompanies.slice(0, 3)).map((company, index) => {
-            const isLarge = index < 2 ? false : company.initiatives.length > 5;
-            return (
-              <div 
-                key={index} 
-                className={`rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-96 ${isLarge ? 'md:col-span-2' : ''}`}
+          <AnimatePresence>
+            {showCards && (
+              <motion.div 
+                className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-72 cursor-pointer"
                 style={{ 
-                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${backgroundImages[index % backgroundImages.length]})`,
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/underwater.jpg)`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
               >
                 <div className="h-full flex flex-col p-6">
-                  <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">{company.company}</h3>
-                  <div className="flex-grow overflow-y-auto px-2">
-                    <ul className={`space-y-3 ${isLarge ? 'grid grid-cols-2 gap-x-4 gap-y-3 space-y-0' : ''}`}>
-                      {company.initiatives.map((initiative, i) => (
-                        <li
-                          key={i}
-                          className="text-xl text-white hover:text-red-300 transition-colors cursor-pointer flex items-start"
-                          onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`); } }}
-                          tabIndex={0}
-                          role="button"
-                          aria-label={`View initiative ${initiative.initiative}`}
-                        >
-                          <span className="mr-2">•</span>
-                          <span>{initiative.initiative} {initiative.count > 1 && `(${initiative.count})`}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">Virgin Voyages</h3>
+                  <p className="text-xl text-white">Recycle ocean plastic waste into clothing</p>
                 </div>
-              </div>
-            );
-          })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <AnimatePresence>
+            {showCards && (
+              <motion.div 
+                className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-72 cursor-pointer"
+                onClick={() => router.push('/initiative/Virgin%20Oceans/Saving%20the%20turtles%20initiative')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push('/initiative/Virgin%20Oceans/Saving%20the%20turtles%20initiative'); } }}
+                tabIndex={0}
+                role="button"
+                aria-label="View saving the turtles initiative"
+                style={{ 
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/turtles.jpg)`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="h-full flex flex-col p-6">
+                  <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">Virgin Oceans</h3>
+                  <p className="text-xl text-white">Saving the turtles initiative</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        {!showAll && (
-          <div className="flex justify-center mt-10">
-            <button onClick={() => setShowAll(true)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-              View All Initiatives
-            </button>
-          </div>
-        )}
+        
+        <AnimatePresence>
+          {showMore && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="text-4xl font-bold mb-2 text-black text-center">More initiatives</h2>
+              <p className="text-xl text-gray-600 mb-8 text-center">Personalized initiatives for you.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-flow-dense">
+                {(showAll ? orderedCompanies : orderedCompanies.slice(0, 3)).map((company, index) => {
+                  const isLarge = index < 2 ? false : company.initiatives.length > 5;
+                  return (
+                    <div 
+                      key={index} 
+                      className={`rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-96 ${isLarge ? 'md:col-span-2' : ''}`}
+                      style={{ 
+                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${backgroundImages[index % backgroundImages.length]})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    >
+                      <div className="h-full flex flex-col p-6">
+                        <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">{company.company}</h3>
+                        <div className="flex-grow overflow-y-auto px-2">
+                          <ul className={`space-y-3 ${isLarge ? 'grid grid-cols-2 gap-x-4 gap-y-3 space-y-0' : ''}`}>
+                            {company.initiatives.map((initiative, i) => (
+                              <li
+                                key={i}
+                                className="text-xl text-white hover:text-red-300 transition-colors cursor-pointer flex items-start"
+                                onClick={() => router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push(`/initiative/${encodeURIComponent(company.company)}/${encodeURIComponent(initiative.initiative)}`); } }}
+                                tabIndex={0}
+                                role="button"
+                                aria-label={`View initiative ${initiative.initiative}`}
+                              >
+                                <span className="mr-2">•</span>
+                                <span>{initiative.initiative} {initiative.count > 1 && `(${initiative.count})`}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {!showAll && (
+                <div className="flex justify-center mt-10">
+                  <button onClick={() => setShowAll(true)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+                    View All Initiatives
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
