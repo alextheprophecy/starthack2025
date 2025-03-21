@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Constants for visual customization of different initiative types
 const VISUAL_SETTINGS = {
@@ -257,6 +258,7 @@ export default function ImpactForest({ initiatives, isProfileView = false, isMyI
                     backgroundSize: '5% 10%'
                   }}></div>             
                 </div>
+                
                 {/* Initiative Items */}
         {treesRef.current.map((item, index) => {
           const visualSettings = getVisualSettings(item.type);
@@ -319,63 +321,103 @@ export default function ImpactForest({ initiatives, isProfileView = false, isMyI
           </div>
         )})}
 
-        {/* Special Starfish for My Initiatives Page */}
-        {isMyInitiativesPage && showStarfish && (
-          <div 
-            className="absolute transition-all duration-500 group"
-            style={{
-              left: '50%',
-              bottom: '20%',
-              transform: 'translateX(-50%) scale(1)',
-              transformOrigin: 'center bottom',
-              width: `${VISUAL_SETTINGS.starfish.width}px`,
-              height: `${VISUAL_SETTINGS.starfish.height}px`,
-              zIndex: 120,
-              transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Spring effect
-              animation: 'appear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }}
-          >
-            {/* Shadow */}
-            <div 
-              className="absolute left-1/2 -translate-x-1/2 transition-all duration-500"
-              style={{
-                bottom: '-3px',
-                width: '70px',
-                height: '25px',
-                zIndex: 119,
-                opacity: 0.4,
-                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' // Spring effect
-              }}
-            >
-              <Image
-                src="/images/shadow.png"
-                alt="Shadow"
-                width={50}
-                height={15}
-                className="w-full h-full"
-              />
-            </div>
+        {/* Special Starfish for My Initiatives Page using Framer Motion */}
+        <AnimatePresence>
+          {isMyInitiativesPage && showStarfish && (
             
-            <div 
-              style={{ 
-                transform: `translateY(${-VISUAL_SETTINGS.starfish.yOffset}px)`,
-                height: '100%',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-end'
+            <> {/* Shadow with Framer Motion */}
+              <motion.div 
+                className="absolute left-1/2"
+                style={{
+                  bottom: '60px',
+                  width: '70px',
+                  height: '25px',
+                  zIndex: 119,
+                  translateX: '-50%'
+                }}
+                initial={{ opacity: 0, scale: 1 }}
+                animate={{ 
+                  opacity: 0.4,
+                  scale: [1, 0.7, 1]
+                }}
+                transition={{ 
+                  opacity: {
+                    duration: 0.7,
+                    delay: 0.1
+                  },
+                  scale: {
+                    delay: 1.2,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                    duration: 0.6,
+                    ease: "easeInOut",
+                    times: [0, 0.5, 1]
+                  }
+                }}
+              >
+                <Image
+                  src="/images/shadow.png"
+                  alt="Shadow"
+                  width={50}
+                  height={15}
+                  className="w-full h-full"
+                />
+              </motion.div>
+              <motion.div 
+              className="absolute"
+              style={{
+                left: '50%',
+                bottom: '20%',
+                width: `${VISUAL_SETTINGS.starfish.width}px`,
+                height: `${VISUAL_SETTINGS.starfish.height}px`,
+                zIndex: 120,
+                transformOrigin: 'center bottom',
+              }}
+              initial={{ x: '-50%', scale: 0 }}
+              animate={{ 
+                x: '-50%', 
+                scale: 1,
+                y: [0, -15, 0],
+              }}
+              transition={{
+                scale: { 
+                  duration: 0.7, 
+                  type: 'spring',
+                  stiffness: 260,
+                  damping: 15
+                },
+                y: {
+                  delay: 1.2,
+                  repeat: Infinity,
+                  repeatType: "mirror",
+                  duration: 0.6,
+                  ease: "easeInOut"
+                }
               }}
             >
-              <Image
-                src="/images/starfish.png"
-                alt="Starfish icon"
-                width={VISUAL_SETTINGS.starfish.width}
-                height={VISUAL_SETTINGS.starfish.height}
-                className="object-contain cursor-pointer hover:scale-110 transition-transform"
-              />
-            </div>
-          </div>
-        )}
+             
+              <motion.div 
+                style={{ 
+                  transform: `translateY(${-VISUAL_SETTINGS.starfish.yOffset}px)`,
+                  height: '100%',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-end'
+                }}
+              >
+                <Image
+                  src="/images/starfish.png"
+                  alt="Starfish icon"
+                  width={VISUAL_SETTINGS.starfish.width}
+                  height={VISUAL_SETTINGS.starfish.height}
+                  className="object-contain cursor-pointer hover:scale-110 transition-transform"
+                />
+              </motion.div>
+            </motion.div>
+            </>
+          )}
+        </AnimatePresence>
             </div>
         </div>        
        

@@ -31,20 +31,20 @@
         {
           "initiativeId": 3,
           "dateParticipated": "2024-03-10",
-          "pointsEarned": 75,
+          "pointsEarned": 5,
           "contribution": "Led community fitness class"
         },
         {
           "initiativeId": 2,
-          "dateParticipated": "2024-03-10",
-          "pointsEarned": 150,
+          "dateParticipated": "2024-04-10",
+          "pointsEarned": 15,
           "contribution": "Sold my phone"
         },
         {
           "initiativeId": 1,
-          "dateParticipated": "2024-03-10",
-          "pointsEarned": 75,
-          "contribution": "Led community fitness class"
+          "dateParticipated": "2024-05-10",
+          "pointsEarned": 25,
+          "contribution": "Helped the elderly with their groceries"
         }
       ]
     },

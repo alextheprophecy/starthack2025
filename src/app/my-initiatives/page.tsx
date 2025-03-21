@@ -107,7 +107,22 @@ export default function MyInitiatives() {
                     contribution: userInit.contribution,
                   };
                 });
-                setUserInitiatives(userInitiativesWithDetails);
+                
+                // Add fake turtle initiative
+                const fakeInitiative: InitiativeWithParticipation = {
+                  company: "Ocean Conservation",
+                  initiative: "Save the Turtles",
+                  challenge: "Plastic pollution threatens sea turtles",
+                  solution: "Funding cleanup and conservation efforts",
+                  callToAction: "Donate to help save turtles",
+                  links: ["https://www.seaturtles.org"],
+                  type: "environmental",
+                  dateParticipated: new Date().toISOString().split('T')[0],
+                  pointsEarned: 50,
+                  contribution: "Donated 5CHF to the Save the Turtles initiative"
+                };
+                
+                setUserInitiatives([fakeInitiative, ...userInitiativesWithDetails]);
                 
                 // Calculate points by category (simplified mock calculation)
                 const environmental = Math.round(currentUser.points * 0.35); // 35% of total points
