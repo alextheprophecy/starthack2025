@@ -168,5 +168,15 @@
     "Call to Action": "dnqk",
     "Links": "dnqkl",
     "Reward": "sustainability"
+  },
+  {
+    "uid": "challenge-18",
+    "Virgin Company": "Virgin Oceans",
+    "Initiaitive": "Saving the turtles initiative",
+    "Challenge": "Sea turtles face critical threats from plastic pollution, habitat loss, and climate change, endangering their survival.",
+    "What Virgin is doing": "Virgin Oceans is partnering with marine conservationists to implement measures to protect and restore sea turtle populations. This includes sustainable practices, beach clean-ups, and community awareness programs.",
+    "Call to Action": "- Volunteer for beach clean-ups\n- Donate to marine conservation efforts",
+    "Links": "https://virgin.oceans.com/virgin-oceans/turtles\nhttps://virgin.oceans.com/marine-conservation",
+    "Reward": "sustainability"
   }
 ]

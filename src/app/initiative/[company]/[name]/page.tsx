@@ -102,13 +102,13 @@ export default function InitiativeDetails({
     return null;
   }
 
+  // Default view for other initiatives
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto p-6">
         <button 
           onClick={() => router.back()}
-          className="mb-6 flex items-center text-red-600 hover:text-red-700"
-          style={{ cursor: 'pointer' }}
+          className="mb-6 flex items-center text-red-600 hover:text-red-700 cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -141,8 +141,7 @@ export default function InitiativeDetails({
                       />
                     ))}
                     <motion.div 
-                      className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-sm font-semibold text-red-600 shadow-sm hover:bg-white hover:text-red-700" 
-                      style={{ cursor: 'pointer' }}
+                      className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-sm font-semibold text-red-600 shadow-sm hover:bg-white hover:text-red-700 cursor-pointer" 
                       whileHover={{ 
                         backgroundColor: "#FFFFFF", 
                         color: "#DC2626",
@@ -171,7 +170,8 @@ export default function InitiativeDetails({
                     <p className="text-gray-600">{initiative.whatVirginIsDoing}</p>
                   </div>
                   
-                  {initiative.callToAction && (
+                  {/* Call to Action - show here only for non-turtle initiatives */}
+                  {initiative.callToAction && decodedName.toLowerCase() !== "saving the turtles initiative" && (
                     <div className="mb-6">
                       <h3 className="text-xl font-semibold text-gray-700 mb-2">Call to Action:</h3>
                       <p className="text-gray-600 whitespace-pre-line">{initiative.callToAction}</p>
@@ -196,13 +196,84 @@ export default function InitiativeDetails({
                               href={link} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-red-600 hover:underline"
-                              style={{ cursor: 'pointer' }}
+                              className="text-red-600 hover:underline cursor-pointer"
                             >
                               {link}
                             </a>
                           )
                         ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Get Involved Section - Only show for Turtle Initiative */}
+                  {decodedName.toLowerCase() === "saving the turtles initiative" && (
+                    <div className="mt-6 pt-6 border-t">
+                      <h3 className="text-2xl font-bold text-red-600 mb-4">Get Involved</h3>
+                      
+                      <div className="flex flex-col md:flex-row gap-6">
+                         {/* Left side - Map */}
+                         <div className="w-full md:w-1/2">
+                          <div className="mb-3">
+                            <h4 className="text-lg font-semibold text-gray-700 mb-1">Beach Cleanup Events</h4>
+                            <p className="text-gray-600">Join us every Wednesday at Nipos Grand Beach for our weekly cleanup initiative.</p>
+                          </div>
+                          <div className="relative w-full">
+                            <img
+                              src="/images/map.png"
+                              alt="Meeting Point for Beach Cleanup"
+                              className="rounded-lg shadow-md hover:scale-105 transition-transform cursor-pointer w-full"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="bg-white bg-opacity-75 text-red-600 font-bold px-2 py-1 rounded text-sm">
+                                Beach Cleanup Location
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-3 flex flex-col sm:flex-row items-center justify-between">
+                            <p className="text-lg font-medium text-gray-800 mb-2 sm:mb-0">
+                              Volunteer for beach clean-ups
+                            </p>
+                            <button
+                              onClick={() => {}}
+                              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded cursor-pointer"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              Contact Organizer
+                            </button>
+                          </div>
+                        </div>
+                        {/* Right side - Donation options */}
+                        <div className="w-full md:w-1/2 flex flex-col justify-center md:h-full gap-6 md:py-6">
+                          <div>
+                            <h4 className="text-xl font-semibold text-gray-700 mb-4">Donate to the cause</h4>
+                            <div className="flex gap-3 mb-4">
+                              <button
+                                onClick={() => {}}
+                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded cursor-pointer flex-1"
+                              >
+                                5 CHF
+                              </button>
+                              <button
+                                onClick={() => {}}
+                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded cursor-pointer flex-1"
+                              >
+                                10 CHF
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => {}}
+                              className="border-2 border-red-600 text-red-600 hover:bg-red-50 font-bold py-3 px-6 rounded cursor-pointer w-full"
+                            >
+                              Custom Amount
+                            </button>
+                            <p className="text-sm text-gray-600 mt-3">
+                              Your donation helps fund beach cleanups and turtle conservation efforts
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

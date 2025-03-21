@@ -29,6 +29,7 @@ export default function Home() {
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   const [companyInitiatives, setCompanyInitiatives] = useState<CompanyInitiatives[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(true);
   
   // Background images for cards
   const backgroundImages = [
@@ -95,6 +96,19 @@ export default function Home() {
     }
   }, [user, router]);
 
+  // Insert demo loading UI before the authentication check
+  if (demoLoading) {
+    return (
+      <div tabIndex={0}
+           onClick={() => setDemoLoading(false)}
+           onKeyDown={() => setDemoLoading(false)}
+           className="min-h-screen flex flex-col items-center justify-center bg-white cursor-pointer">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500"></div>
+        <p className="text-xl font-bold mt-4 text-red-600">Calculating your preferences...</p>
+      </div>
+    );
+  }
+
   // Don't render the page content if not authenticated or if internal user
   if (!user || user.userType === 'internal') {
     return null;
@@ -123,37 +137,32 @@ export default function Home() {
       <main className="container mx-auto p-6 mt-10">
         <h2 className="text-4xl font-bold mb-2 text-black text-center">Initiatives we think you'll love</h2>
         <p className="text-xl text-gray-600 mb-8 text-center">We recommend these initiatives based on your interests and preferences.</p>
-        <div 
-          className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow mb-16 w-full cursor-pointer"
-          style={{ 
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)), url(/images/underwater.jpg)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '300px'
-          }}
-        >
-          <div className="h-full flex p-6">
-            <div className="w-1/2 pr-4">
-              <h3 className="text-5xl font-extrabold text-white mb-6 tracking-tight">Virgin Limited Edition</h3>
-              <div className="mt-4">
-                <p className="text-xl text-white flex items-start">
-                  <span className="mr-2 text-red-500">•</span>
-                  <span>Recycle ocean plastic waste into clothing</span>
-                </p>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
+          <div className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-72 cursor-pointer"
+               style={{ 
+                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/underwater.jpg)`,
+                 backgroundSize: 'cover',
+                 backgroundPosition: 'center'
+               }}>
+            <div className="h-full flex flex-col p-6">
+              <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">Virgin Voyages</h3>
+              <p className="text-xl text-white">Recycle ocean plastic waste into clothing</p>
             </div>
-            <div className="w-1/2 pl-4">
-              <h3 className="text-5xl font-extrabold text-white mb-6 tracking-tight">Virgin Voyages</h3>
-              <div className="mt-4 space-y-3">
-                <p className="text-xl text-white flex items-start">
-                  <span className="mr-2 text-red-500">•</span>
-                  <span>Eliminating single-use plastics</span>
-                </p>
-                <p className="text-xl text-white flex items-start">
-                  <span className="mr-2 text-red-500">•</span>
-                  <span>Eliminating single-use plastics</span>
-                </p>
-              </div>
+          </div>
+          <div className="rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-72 cursor-pointer"
+               onClick={() => router.push('/initiative/Virgin%20Oceans/Saving%20the%20turtles%20initiative')}
+               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push('/initiative/Virgin%20Oceans/Saving%20the%20turtles%20initiative'); } }}
+               tabIndex={0}
+               role="button"
+               aria-label="View saving the turtles initiative"
+               style={{ 
+                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(/images/underwater.jpg)`,
+                 backgroundSize: 'cover',
+                 backgroundPosition: 'center'
+               }}>
+            <div className="h-full flex flex-col p-6">
+              <h3 className="text-6xl font-extrabold text-white mb-8 tracking-tight">Virgin Oceans</h3>
+              <p className="text-xl text-white">Saving the turtles initiative</p>
             </div>
           </div>
         </div>

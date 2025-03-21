@@ -211,7 +211,7 @@ export default function MyInitiatives() {
                       useEasing={true}
                     />
                   </div>
-                  <div className="text-sm uppercase font-semibold tracking-wider text-gray-600">Total Points</div>
+                  <div className="text-sm uppercase font-semibold tracking-wider text-gray-600">Community Points</div>
                 </div>
                 
                 {/* Redeem Points Buttons - now stacked next to total points */}
