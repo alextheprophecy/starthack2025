@@ -133,10 +133,10 @@ Open <http://localhost:3000> and log in with the demo account **`user@gmail.com`
 
 ## Team
 
-Built at START Hack 2025 by:
+**The Alex Team** built this at START Hack 2025:
 
-- [@alextheprophecy](https://github.com/alextheprophecy)
-<!-- Add teammates here: - [Name](https://github.com/handle) -->
+- **Alex** · [@alextheprophecy](https://github.com/alextheprophecy)
+- **Alexandros Pantalos** · [@alexp34](https://github.com/alexp34)
 
 ---
 
